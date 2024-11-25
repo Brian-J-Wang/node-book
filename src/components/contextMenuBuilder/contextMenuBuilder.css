@@ -1,0 +1,15 @@
+.cmb__container {
+    width: 200px;
+    background-color: white;
+    border: 1px solid #292929;
+    border-radius: 3px;
+    box-shadow: 2px 2px #292929;
+}
+
+.cmb__option {
+    padding-left: 20px;
+}
+
+.cmb__option:hover {
+    background-color: whitesmoke;
+}

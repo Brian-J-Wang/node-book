@@ -1,0 +1,42 @@
+.n {
+    position: absolute;
+    border: 1px solid #292929;
+    border-radius: 7px;
+    background-color: white;
+    width: 200px;
+    box-shadow: 3px 3px #292929;
+}
+
+.n__header {
+    
+    display: flex;
+}
+
+.n__cb-input {
+    width: 16px;
+    height: 16px;
+    margin: auto 6px
+}
+
+.n__body {
+    border-top: 1px solid #292929;
+}
+
+.n__h3 {
+    margin: auto 0px
+}
+
+.n__p {
+    margin: 0px 0px 0px 4px;
+    font-size: small;
+}
+
+.n__node-connection {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    background-color: whitesmoke;
+    border: 1px solid #292929;
+    border-radius: 2px;
+    cursor: pointer;
+}

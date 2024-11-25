@@ -1,0 +1,10 @@
+.draggable {
+    cursor: default !important; 
+   
+}
+
+.draggable:active {
+    cursor: -webkit-grabbing !important;
+    cursor: -moz-grabbing !important;
+    cursor: grabbing !important;
+}
