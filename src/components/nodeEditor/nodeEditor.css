@@ -1,0 +1,43 @@
+.ne {
+    position: absolute;
+    margin: 12px;
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #292929;
+    border-radius: 7px;
+    box-shadow: 3px 3px #292929;
+    width: 350px;
+    height: calc(100vh - 24px);
+    top: 0;
+    right: 0;
+    transition: right 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.ne__header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.ne__checkbox {
+    height: 30px;
+    width: 30px;
+}
+
+.ne__blurb {
+    margin: 0px;
+    line-height: 30px;
+}
+
+.ne__close {
+    border: 1px solid #292929;
+    width: 22px;
+    height: 22px;
+    box-shadow: 2px 2px #292929;
+    padding: 1px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

@@ -25,7 +25,7 @@ const DraggableContext = createContext<ContextProps>({
     suppressDrag: () => {}
 });
 
-const Draggable = ({className, children, detached, id: name, initialPosition, invertDrag, passDragStart, passDrag, preventDefault}: DraggableProps) => {
+const Draggable = ({className, children, detached, id, initialPosition, invertDrag, passDragStart, passDrag, preventDefault}: DraggableProps) => {
     const [position, setPosition] = useState<Position>(setInitialPosition);
     const dragStartPosition = useRef<Position>({x: 0, y: 0});
     const dragStartClientPosition = useRef<Position>(setInitialPosition());
@@ -77,7 +77,7 @@ const Draggable = ({className, children, detached, id: name, initialPosition, in
         }
 
         //@ts-ignore
-        if (evt.target.id != name) {
+        if (evt.target.id != id) {
             return;
         }
 
@@ -123,7 +123,7 @@ const Draggable = ({className, children, detached, id: name, initialPosition, in
                 style={!preventDefault ? {position: 'absolute', 
                     top: position.y + (!detached ? parentPosition.position.y : 0), 
                     left: position.x + (!detached ? parentPosition.position.x : 0)} : {}}
-                id={name}>
+                id={id}>
                     {children}
             </div>
         </DraggableContext.Provider>
@@ -153,7 +153,7 @@ const PreventDrag = ({children, hidden}: PreventDragProps) => {
     }
 
     return (
-        <div onMouseDown={onMouseDown} hidden={hidden}>
+        <div onMouseDown={onMouseDown} hidden={hidden} style={{height: '100%'}}>
             {children}
         </div>
     )

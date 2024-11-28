@@ -1,58 +1,83 @@
-import { Position } from "../nodeviewer/nodeviewer"
+import { NodeViewerContext, Position } from "../nodeviewer/nodeviewer"
 import "./node.css"
 import Draggable from "../../properties/draggable/draggable"
-import { useState } from "react"
+import { useContext, useState } from "react"
+import { NodeEditorContext } from "../nodeEditor/nodeEditor"
+import createConnection from "../../assets/create-connection.svg"
 
 export interface NodeProps {
     id: string,
     position: Position,
     title: string,
     description: string
+    isComplete?: boolean
 }
 
-const Node : React.FC<NodeProps> = ({position, title, description, id}) => {
-    const [showPorts, setShowPort] = useState<boolean>(false);
+const Node : React.FC<NodeProps> = (props) => {
+    const [isComplete, setIsComplete] = useState<boolean>(false);
+    const nodeEditorContext = useContext(NodeEditorContext)
 
-    function handleMouseEnter() {
-        setShowPort(true);
+    function openNodeEditor() {
+        nodeEditorContext.openEditor(props);
     }
 
-    function handleMouseLeave() {
-        setShowPort(false);
+    function changeIsComplete() {
+        setIsComplete(!isComplete);
     }
 
-    function handleDrag() {
-        setShowPort(false);
+    const nodeViewerContext = useContext(NodeViewerContext);
+    function handleDrawConnection(evt: React.MouseEvent) {
+        evt.stopPropagation();
+        console.log("this is clicked");
+        nodeViewerContext.drawConnection(props.id);
     }
 
-    function handleDraw() {
-        
+    function generateOutline() {
+
+        let className = "n__action-outline"
+
+        if (nodeViewerContext.specialAction != undefined && nodeViewerContext.specialAction.for != props.id) {
+            className += " n__action-outline__valid-target";
+        }
+
+        return className
+    }
+
+    function shouldHideToolbar() {
+        if (nodeEditorContext.activeNode != props.id) {
+            return true;
+        } else if (nodeViewerContext.specialAction != undefined) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     return (
-        <Draggable className='n' initialPosition={position} id={id} passDrag={handleDrag}>
-            <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} style={{position: 'relative'}}>
-                <div className="n__header" >
-                    <input type="checkbox" className="n__cb-input"/>
-                    <h3 className="n__h3">{title}</h3>
+        <Draggable initialPosition={props.position} id={props.id} className="node">
+            <div className={generateOutline()}>
+                <div className={`n ${isComplete ? "n__state_complete": ""}`} style={{position: 'relative'}} onClick={openNodeEditor} id={props.id + "-node"}>
+                    <div className="n__header">
+                        <input type="checkbox" className="n__cb-input" onChange={changeIsComplete}/>
+                        <h3 className="n__h3">{props.title}</h3>
+                    </div>
+                    {
+                        (props.description != "" && !isComplete) ? (
+                            <div className="n__body">
+                                <p className="n__p">{props.description ?? ''}</p>
+                            </div>
+                        ) : (
+                            <></>
+                        )
+                    }
                 </div>
-                {
-                    (description != "") ? (
-                        <div className="n__body">
-                            <p className="n__p">{description ?? ''}</p>
-                        </div>
-                    ) : (
-                        <></>
-                    )
-                }
-
-                <Draggable.Prevent hidden={!showPorts}>
-                    <div className="n__node-connection" style={{left: 'calc(50% - 4px)', bottom: -6}} onMouseDown={handleDraw}></div>
-                    <div className="n__node-connection" style={{left: -5, bottom: 'calc(50% - 5px'}} onMouseDown={handleDraw}></div>
-                    <div className="n__node-connection" style={{left: 'calc(50% - 4px)', top: -6}} onMouseDown={handleDraw}></div>
-                    <div className="n__node-connection" style={{right: -5, bottom: 'calc(50% - 5px'}} onMouseDown={handleDraw}></div>
-                </Draggable.Prevent>
-                
+                <div className="n__toolbar" hidden={shouldHideToolbar()}>
+                    <div className="n__toolbar-button-bar">
+                        <button  className="n__buttons" onClick={handleDrawConnection}>
+                            <img src={createConnection} alt="arrow" />
+                        </button>
+                    </div>
+                </div>
             </div>
         </Draggable>
     )

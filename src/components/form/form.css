@@ -1,0 +1,47 @@
+.form__section {
+    border-top: 1px solid rgba(29,29,29,0.5);
+    margin-top: 8px;
+    padding-top: 6px;
+    gap: 6px;
+}
+
+.form__input {
+    min-height: 30px;
+    width: 100%;
+    background-color: whitesmoke;
+    border-radius: 5px;
+    display: flex;
+    padding: 0px 8px;
+    align-items: center;
+    color: rgba(29,29,29,0.4);
+    box-sizing: border-box;
+    font-size: 14px;
+    position: relative;
+    z-index: 5;
+}
+
+.form__multi-line-input {
+
+}
+
+.form__multi-select {
+    
+
+}
+
+.form__text-field {
+    margin: 4.5px 0px;
+    text-wrap: wrap;
+}
+
+.form__text-field__placeholder {
+    color: rgba(29,29,29,0.4);
+}
+
+.form__text-field__string {
+    color: rgba(29, 29, 29);
+}
+
+.form__text-field:focus {
+    outline: none;
+}

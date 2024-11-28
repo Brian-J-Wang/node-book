@@ -10,19 +10,16 @@ function App() {
     document.addEventListener('contextmenu', (evt) => {
       evt.preventDefault();
     });
-
-    document.addEventListener('dragover', (evt) => {
-      evt.preventDefault();
-    });
   })
 
 
   return (
-    <div className='app'>
-      <div>
+    <div className='app' style={{overflow: 'hidden'}}>
+      <div >
         <ContextMenu>
-          <NodeViewer/>
-          <NodeEditor/>
+            <NodeEditor>
+              <NodeViewer/>
+            </NodeEditor>
         </ContextMenu>
       </div>
     </div>
