@@ -1,0 +1,7 @@
+.item-node__container {
+    width: 200px;
+    background-color: white;
+    border: 1px solid #292929;
+    border-radius: 7px;
+    box-shadow: 2px 2px #292929;
+}

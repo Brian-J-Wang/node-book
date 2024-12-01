@@ -1,0 +1,11 @@
+.edge-renderer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+.edge-renderer__fake-line {
+    stroke: #292929;
+    stroke-width: 3;
+}

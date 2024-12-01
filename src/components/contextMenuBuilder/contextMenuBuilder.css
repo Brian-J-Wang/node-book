@@ -4,12 +4,49 @@
     border: 1px solid #292929;
     border-radius: 3px;
     box-shadow: 2px 2px #292929;
+    overflow: hidden;
+}
+
+.cmb__item {
+    height: 24px;
 }
 
 .cmb__option {
-    padding-left: 20px;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.cmb__option__style_no-image {
+    padding-left: 28px;
+}
+
+.cmb__option-image {
+    padding-left: 4px;
+    padding-right: 2px;
+    box-sizing: border-box;
+    height: 20px;
+    width: 20px;
+    margin-right: 4px;
+}
+
+.cmb__option-p {
+    margin: 0px;
+    padding: 0px;
 }
 
 .cmb__option:hover {
     background-color: whitesmoke;
+}
+
+.cmb__option__style_no-image:hover {
+    background-color: whitesmoke;
+}
+
+.cmb__divider {
+    margin: 0px 2px;
+    border: 0px;
+    border-top: 1px solid #292929;
+    height: 1px;
+    border-bottom: 1px solid #292929;
 }

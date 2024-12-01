@@ -1,32 +1,46 @@
-import { createContext, ReactNode, useRef, useState } from "react";
+import { createContext, ReactNode, RefObject, useRef, useState } from "react";
 
 import "./nodeEditor.css"
 import Form, { FormHandle } from "../form/form";
-import { NodeProps } from "../node/node";
+import { NodeProps } from "../node/interfaces";
 
 import Button from "../shared/button/button";
+import DetectOutOfBounds, { OutofBoundsHandle } from "../../properties/detectOutofBounds/detectOutOfBounds";
 
 type NodeEditorProps = {
     children: ReactNode
 }
 
 export const NodeEditorContext = createContext<{
-    openEditor: (props: NodeProps) => void
+    suppressEditor: (suppress: boolean) => void
+    openEditor: (title: string, props: NodeProps, onEditorClose: () => {}) => void
     activeNode: string,
 }>({
+    suppressEditor: () => {},
     openEditor: () => {},
     activeNode: ""
 });
 
-
 const NodeEditor = ({children} : NodeEditorProps) => {
+    const [editorTitle, setEditorTitle] = useState<string>("");
     const [activeEditor, setActiveEditor] = useState<NodeProps | null>(null);
     const [activeNode, setActiveNode] = useState<string>("");
     const formRef = useRef<FormHandle | null>(null);
+    const boundingElement = useRef<HTMLDivElement>() as RefObject<HTMLDivElement>;
+    const boundController = useRef<OutofBoundsHandle>() as RefObject<OutofBoundsHandle>;
+    const suppressEditor = useRef<boolean>();
+    const handleEditorClose = useRef<() => void>(() => {});
 
-    const openEditor = (props: NodeProps) => {
+    const openEditor = (title: string, props: NodeProps, onEditorClose: () => void = () => {}) => {
+        if (suppressEditor.current) {
+            return;
+        }
+
+        setEditorTitle(title);
         setActiveEditor(props);
         setActiveNode(props.id);
+        handleEditorClose.current = onEditorClose
+        boundController.current?.setListen(true);
     }
 
     const closeEditor = () => {
@@ -35,23 +49,30 @@ const NodeEditor = ({children} : NodeEditorProps) => {
         if (formRef.current) {
             formRef.current.clearForm();
         }
+
+        if (handleEditorClose.current) {
+            handleEditorClose.current();
+            handleEditorClose.current = () => {};
+        }
+        boundController.current?.setListen(false);
     }
 
     return (
-        <NodeEditorContext.Provider value={{openEditor, activeNode}} >
+        <NodeEditorContext.Provider value={{openEditor, activeNode, suppressEditor(suppress) {
+            suppressEditor.current = suppress;
+        },}} >
             {children}
-            <div className="ne" id="nodeEditor" style={{visibility: (activeEditor == null) ? 'hidden' : 'visible'}}>
-                <div className="ne__header">
-                    <h2 className="ne__blurb">{activeEditor?.title}</h2>
-                    <Button.Destructive onClick={closeEditor}></Button.Destructive>
-                </div>
-                <Form name={"nodeEditorForm"} ref={formRef}>
-                    <Form.Section>
+            <DetectOutOfBounds ref={boundController} boundingElement={boundingElement} onOutOfBound={closeEditor}>
+                <div ref={boundingElement} className="ne" id="nodeEditor" style={{visibility: (activeEditor == null) ? 'hidden' : 'visible'}}>
+                    <div className="ne__header">
+                        <h2 className="ne__blurb">{editorTitle}</h2>
+                        <Button.Destructive onClick={closeEditor}></Button.Destructive>
+                    </div>
+                    <Form name={"nodeEditorForm"} ref={formRef}>
                         <Form.MultiSelect name="Tags"/>
-                        <Form.TextField placeholder="Add Text Here" initialValue={activeEditor?.description ?? "Enter value here"}/>
-                    </Form.Section>
-                </Form>
-            </div>
+                    </Form>
+                </div>
+            </DetectOutOfBounds>
         </NodeEditorContext.Provider>
     )
 }

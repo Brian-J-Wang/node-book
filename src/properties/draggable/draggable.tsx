@@ -1,7 +1,7 @@
-import { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
+import { createContext, ReactNode, useContext, useRef, useState } from "react";
 import { Position } from "../../components/nodeviewer/nodeviewer"
 import "./draggable.css"
-import { DrawableContext } from "../drawable/drawable";
+import { GlobalDragContext } from "./globalDragController";
 
 type DraggableProps = {
     id: string,
@@ -11,8 +11,9 @@ type DraggableProps = {
     invertDrag?: boolean,
     preventDefault?: boolean
     initialPosition?: Position
-    passDragStart?: (position: Position) => void,
-    passDrag?: (position: Position) => void
+    onDragStart?: (position: Position) => void,
+    onDrag?: (position: Position) => void
+    onDragEnd?: (position: Position) => void
 }
 
 type ContextProps = {
@@ -25,12 +26,13 @@ const DraggableContext = createContext<ContextProps>({
     suppressDrag: () => {}
 });
 
-const Draggable = ({className, children, detached, id, initialPosition, invertDrag, passDragStart, passDrag, preventDefault}: DraggableProps) => {
+const Draggable = ({className, children, detached, id, initialPosition, invertDrag, onDragStart, onDrag, onDragEnd, preventDefault}: DraggableProps) => {
     const [position, setPosition] = useState<Position>(setInitialPosition);
     const dragStartPosition = useRef<Position>({x: 0, y: 0});
     const dragStartClientPosition = useRef<Position>(setInitialPosition());
     const parentPosition = useContext(DraggableContext);
-    const drawingContext = useContext(DrawableContext);
+    const dragControllerContext = useContext(GlobalDragContext);
+
     
     const [suppress, setSuppress] = useState<boolean>(false);
 
@@ -38,13 +40,8 @@ const Draggable = ({className, children, detached, id, initialPosition, invertDr
         return initialPosition ? initialPosition : {x: 0, y: 0};
     }
 
-    function onDragStart(evt: React.DragEvent<HTMLInputElement>) {
-        
-        if (suppress) {
-            return;
-        }
-
-        if (drawingContext.isDrawing) {
+    function handleDragStart(evt: React.DragEvent<HTMLDivElement>) {
+        if (suppress || dragControllerContext.isSuppress) {
             evt.preventDefault();
             return;
         }
@@ -59,19 +56,13 @@ const Draggable = ({className, children, detached, id, initialPosition, invertDr
             y: evt.clientY
         }
 
-        if (passDragStart) {
-            passDragStart(position);
-        }
-
-        
+        if (onDragStart) {
+            onDragStart(position);
+        }        
     }
 
-    function onDrag(evt: React.DragEvent<HTMLInputElement>) {
-        if (suppress) {
-            return;
-        }
-
-        if (drawingContext.isDrawing) {
+    function handleDrag(evt: React.DragEvent<HTMLDivElement>) {
+        if (suppress || dragControllerContext.isSuppress) {
             evt.preventDefault();
             return;
         }
@@ -102,8 +93,22 @@ const Draggable = ({className, children, detached, id, initialPosition, invertDr
             y: newPosition.y
         });
         
-        if (passDrag) {
-            passDrag(newPosition)
+        if (onDrag) {
+            onDrag(newPosition)
+        }
+    }
+
+    function handleDragEnd(evt: React.DragEvent<HTMLDivElement>) {
+        resetCursor(evt);
+
+        //@ts-ignore
+        const rect = evt.target.getBoundingClientRect();
+
+        if (onDragEnd) {
+            onDragEnd({
+                x: rect.x,
+                y: rect.y
+            })
         }
     }
 
@@ -113,13 +118,9 @@ const Draggable = ({className, children, detached, id, initialPosition, invertDr
         document.body.style.cursor = 'default';
     }
 
-    function handleSuppress(suppress: boolean) {
-        setSuppress(suppress);
-    }
-
     return (
-        <DraggableContext.Provider value={{position, suppressDrag: handleSuppress}}>
-            <div className={`${className} draggable`} onDragStart={onDragStart} onDrag={onDrag} onDragEnd={resetCursor} draggable={true} 
+        <DraggableContext.Provider value={{position, suppressDrag: setSuppress}}>
+            <div className={`${className} draggable`} onDragStart={handleDragStart} onDrag={handleDrag} onDragEnd={handleDragEnd} draggable={true} 
                 style={!preventDefault ? {position: 'absolute', 
                     top: position.y + (!detached ? parentPosition.position.y : 0), 
                     left: position.x + (!detached ? parentPosition.position.x : 0)} : {}}
@@ -148,6 +149,7 @@ const PreventDrag = ({children, hidden}: PreventDragProps) => {
 
     function handleMouseUp() {
         ParentDraggableContext.suppressDrag(false);
+
         document.removeEventListener("mouseup", handleMouseUp);
         document.removeEventListener("dragend", handleMouseUp);
     }
@@ -157,7 +159,6 @@ const PreventDrag = ({children, hidden}: PreventDragProps) => {
             {children}
         </div>
     )
-    
 }
 
 Draggable.Prevent = PreventDrag;

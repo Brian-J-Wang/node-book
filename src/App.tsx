@@ -3,6 +3,8 @@ import './App.css'
 import ContextMenu from './components/contextMenu/ContextMenu'
 import NodeViewer from './components/nodeviewer/nodeviewer'
 import NodeEditor from './components/nodeEditor/nodeEditor'
+import GlobalDragController from './properties/draggable/globalDragController'
+import Collection from './components/collection/Collection'
 
 function App() {
 
@@ -16,11 +18,15 @@ function App() {
   return (
     <div className='app' style={{overflow: 'hidden'}}>
       <div >
-        <ContextMenu>
-            <NodeEditor>
-              <NodeViewer/>
-            </NodeEditor>
-        </ContextMenu>
+        <Collection>
+          <GlobalDragController>
+            <ContextMenu>
+              <NodeEditor>
+                <NodeViewer/>
+              </NodeEditor>
+            </ContextMenu>
+          </GlobalDragController>
+        </Collection>
       </div>
     </div>
     

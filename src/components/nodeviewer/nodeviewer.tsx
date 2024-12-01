@@ -1,34 +1,43 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import Node, { NodeProps } from "../node/node";
+import React, { createContext, RefObject, useContext, useEffect, useRef, useState } from "react";
 import "./nodeviewer.css"
 import { contextMenuContext } from "../contextMenu/ContextMenu";
 import ContextMenuBuilder from "../contextMenuBuilder/contextMenuBuilder";
 import Draggable from "../../properties/draggable/draggable";
 import { generateObjectId } from "../../utils/uuidGen";
-import Edge, { EdgeProps } from "../edge/edge";
+import { GlobalDragContext } from "../../properties/draggable/globalDragController";
+import EdgeRenderer, { edgeRendererHandle } from "../edgeRenderer/edgeRenderer";
+import { NodeEditorContext } from "../nodeEditor/nodeEditor";
+import { CollectionContext } from "../collection/Collection";
+import NodeRenderer from "../nodeRenderer/nodeRenderer";
+import { NodeType } from "../node/interfaces";
+import { ItemNodeProps } from "../node/item-node/item-node";
 
 export interface Position {
     x: number;
     y: number;
 }
 
-enum ActionTypes {
-    OpenConnections = "OpenConnections"
+export enum ActionTypes {
+    CreateEdges = "CreateEdges",
+    DeleteEdges = "DeleteEdges"
 }
 
 type SpecialAction = {
     for: string
-    type: ActionTypes
+    type: ActionTypes,
+    validTargets?: string[],
+    invalidTargets?: string[]
 }
 
 export const NodeViewerContext = createContext<{
     specialAction?: SpecialAction
-    drawConnection: (nodeId: string) => void
+    drawConnection: (nodeId: string, type: ActionTypes) => void
     specialActionComplete: () => void
 }>({
     specialAction: {
         for: "",
-        type: ActionTypes.OpenConnections
+        type: ActionTypes.CreateEdges,
+        validTargets: []
     },
     drawConnection: () => {},
     specialActionComplete: () => {}
@@ -36,38 +45,8 @@ export const NodeViewerContext = createContext<{
 
 const NodeViewer : React.FC = () => {
     const [position, setPosition] = useState<Position>({x: 0, y: 0});
-    const [nodes, setNodes] = useState<NodeProps[]>([
-        {
-            id: generateObjectId(),
-            position: {x: 200, y: 200},
-            title: "Finish This",
-            description: "This is something that I need to do"
-        },
-        {
-            id: generateObjectId(),
-            position: {x: 200, y: 400},
-            title: "Finish That",
-            description: "This is also another thing that I need to do"
-        },
-        {
-            id: generateObjectId(),
-            position: {x: 200, y: 600},
-            title: "Also Finish This",
-            description: ""
-        },
-    ]);
-    const [edges, setEdges] = useState<EdgeProps[]>([
-        {
-            startingNode: nodes[0].id,
-            terminalNode: nodes[1].id
-        },
-        {
-            startingNode: nodes[1].id,
-            terminalNode: nodes[2].id
-        }
-    ])
     const [specialAction, setSpecialAction] = useState<SpecialAction | undefined>(undefined);
-    
+    const collection = useContext(CollectionContext);
 
     const specialActionComplete = () => {
         setSpecialAction(undefined);
@@ -78,24 +57,20 @@ const NodeViewer : React.FC = () => {
         <ContextMenuBuilder>
             <ContextMenuBuilder.CMOption 
                 onClick={(evt) => {
-                    setNodes([...nodes, {
+                    collection.addNode<ItemNodeProps>({
                         id: generateObjectId(),
-                        position: {x: evt.clientX, y: evt.clientY},
+                        type: NodeType.item,
+                        position: {x: evt.clientX - position.x, y: evt.clientY - position.y},
+                        isChecked: false,
                         title: "Finish This",
                         description: "This is something that I need to do"
-                    }])
+                    });
                 }}
                 blurb="Add Node"
             />
-            <ContextMenuBuilder.CMOption
-                onClick={() => {
-                    console.log("this is also clicked");
-                }}
-                blurb="Add Note"
-            />
         </ContextMenuBuilder>
     );
-    function onMouseDown(evt: any) {
+    function openContext(evt: any) {
         if (evt.button === 2) {
             contextMenu.openContext(nodeViewerContextMenu, {x: evt.nativeEvent.clientX, y: evt.nativeEvent.clientY})
         }
@@ -118,97 +93,93 @@ const NodeViewer : React.FC = () => {
         }
     }, []);
 
-    const [mousePosition, setMousePosition] = useState<Position>({x: 0, y: 0});
-    const [viewPortSize, setViewPortSize] = useState<Position>({
-        x: window.innerWidth, 
-        y: window.innerHeight});
-    const [pseudoLineStartPosition, setPseudoLineStartPosition] = useState<Position>({x: 0, y: 0});
-    useEffect(() => {
-        function updateViewPortSize(evt: any) {
-            setViewPortSize({
-                x: window.innerWidth,
-                y: window.innerHeight
-            })
-        }
-        
-        function updateMousePosition(evt: any) {
-            setMousePosition({
-                x: evt.clientX,
-                y: evt.clientY
-            });
-        }
-
-        document.addEventListener("mousemove", updateMousePosition);
-        window.addEventListener('resize', updateViewPortSize);
-        return () => {
-            document.removeEventListener("mousemove", updateMousePosition);
-            window.removeEventListener("resize", updateViewPortSize);
-        }
-    }, []);
-
-    const drawConnection = (nodeId: string) => {
-        const specialAction = {
-            for: nodeId,
-            type: ActionTypes.OpenConnections,
-        }
-
-        setSpecialAction(specialAction);
-
-        document.addEventListener("click", handleMouseClick)
-
-        const startNode = document.getElementById(nodeId);
-
-        if (startNode) {
-            const rect = startNode.getBoundingClientRect();
-            setPseudoLineStartPosition({
+    const edgeRendererController = useRef<edgeRendererHandle>() as RefObject<edgeRendererHandle>;
+    const globalDragController = useContext(GlobalDragContext);
+    const nodeEditorController = useContext(NodeEditorContext);
+    const drawConnection = (startNode: string, actionType: ActionTypes) => {
+        const rect = document.getElementById(startNode)?.getBoundingClientRect();
+        if (rect) {
+            edgeRendererController.current?.startDrawing({
                 x: rect.x + (rect.width / 2),
                 y: rect.y + (rect.height / 2)
             })
         }
+
+        let specialActionState: SpecialAction = {
+            for: startNode,
+            type: actionType,
+        };
+        if (actionType == ActionTypes.DeleteEdges) {
+            specialActionState.validTargets = collection.getValidDeleteTargets(startNode);
+        } else if (actionType == ActionTypes.CreateEdges) {
+            specialActionState.invalidTargets = collection.getValidDeleteTargets(startNode);
+        }
+        setSpecialAction(specialActionState);
         
+        
+        nodeEditorController.suppressEditor(true);
+        globalDragController.updateSuppress(true);
+        document.addEventListener("click", handleMouseClick);
+        document.addEventListener("keydown", handleKeyboardEscape);
+
+        function handleKeyboardEscape(evt: KeyboardEvent) {
+            console.log(evt);
+            if (evt.key == "Escape") {
+                clearAction();
+                edgeRendererController.current?.stopDrawing();
+            }
+        }
 
         function handleMouseClick(evt : MouseEvent) {
-            //@ts-ignore
-            const terminalNode = evt.target.closest(".node").id;
+            evt.stopImmediatePropagation();
 
-            if (terminalNode) {
-                setEdges([ ...edges, {
-                    startingNode: nodeId,
-                    terminalNode: terminalNode
-                }])
+            const evtTarget = evt.target as Element;
+            const terminalNode = evtTarget.closest(".node")?.id ?? null;
+            if (!terminalNode || terminalNode == startNode) {
+                return;
             }
-            
 
+            console.log("handling state");
+
+            if (specialActionState.type == ActionTypes.CreateEdges) {
+                if (specialActionState.invalidTargets?.includes(terminalNode)) {
+                    return;
+                } else {
+                    collection.addEdge({
+                        startingNode: startNode,
+                        terminalNode: terminalNode
+                    });
+                }
+            } else if (specialActionState?.type == ActionTypes.DeleteEdges) {
+                console.log('handling delete');
+                if (specialActionState.validTargets?.includes(terminalNode)) {
+                    collection.removeEdge(startNode, terminalNode);
+                } else {
+                    return;
+                }
+            }
+
+            clearAction();
+            edgeRendererController.current?.stopDrawing();   
+        }
+
+        function clearAction() {
+            nodeEditorController.suppressEditor(false);
+            globalDragController.updateSuppress(false);
             setSpecialAction(undefined);
-
             document.removeEventListener("click", handleMouseClick);
+            document.removeEventListener("keydown", handleKeyboardEscape);
         }
     }
 
     return (
-        <Draggable preventDefault passDrag={setPosition} id="nodeViewer">
+        <Draggable preventDefault onDrag={setPosition} id="nodeViewer">
             <NodeViewerContext.Provider value={{specialAction, drawConnection, specialActionComplete}}>
-                {
-                    nodes.map((node) => {
-                        return (
-                            <Node key={node.id} id={node.id} position={node.position} title={node.title} description={node.description} />
-                        )
-                    })
-                }
-                <div className='nv' onMouseDown={onMouseDown} id="nodeViewer"
+                <NodeRenderer/>
+                <div className='nv' onMouseDown={openContext} id="nodeViewer"
                 style={{backgroundPositionX: position.x, backgroundPositionY: position.y}}/>
-                <svg viewBox={`0 0 ${viewPortSize.x} ${viewPortSize.y}`}  width={viewPortSize.x} height={viewPortSize.y} style={{position: 'absolute', zIndex: -1, top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none'}}>
-                    <line x1={pseudoLineStartPosition.x} y1={pseudoLineStartPosition.y} x2={mousePosition.x} y2={mousePosition.y} className="n__node-line" strokeWidth={0} id="pseudo-line"></line>
-                    {
-                        edges.map((edge) => {
-                            return (
-                                <Edge key={`${edge.startingNode}${edge.terminalNode}`}startingNode={edge.startingNode} terminalNode={edge.terminalNode} />
-                            )
-                        })
-                    }
-                </svg>
+                <EdgeRenderer ref={edgeRendererController} />
             </NodeViewerContext.Provider>
-            
         </Draggable>
     )
 }

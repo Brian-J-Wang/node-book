@@ -6,9 +6,10 @@ import "./edge.css"
 export type EdgeProps = {
     startingNode: string,
     terminalNode: string
+    marker?: string
 }
 
-const Edge : React.FC<EdgeProps> = ({ startingNode, terminalNode }) => {
+const Edge : React.FC<EdgeProps> = ({ startingNode, terminalNode, marker}) => {
     const [startingPosition, setStartingPosition] = useState<Position>({x: 0, y: 0});
     const startingElement = useRef<HTMLElement | null>(null);
     const [terminalPosition, setTerminalPosition] = useState<Position>({x: 0, y: 0});
@@ -67,14 +68,42 @@ const Edge : React.FC<EdgeProps> = ({ startingNode, terminalNode }) => {
         }
     }
 
+    function subDividePath(subDivisions: number) {
+        if (subDivisions <= 0) {
+            subDivisions = 1;
+        }
+
+        const delX = (terminalPosition.x - startingPosition.x) / subDivisions;
+        const delY = (terminalPosition.y - startingPosition.y) / subDivisions;
+        
+        const points: Position[] = Array(subDivisions)
+
+        for (let i = 1; i < subDivisions + 1; i++) {
+            points[i] = {
+                x: startingPosition.x + (delX * i),
+                y: startingPosition.y + (delY * i)
+            }
+        }
+
+        return `M${startingPosition.x} ${startingPosition.y}` + points.map((point) => `L${point.x} ${point.y}`).join(' ');
+    }
+
     return (
-        <line x1={startingPosition.x} y1={startingPosition.y} 
-              x2={terminalPosition.x} y2={terminalPosition.y}
-              stroke="black" strokeWidth={4} 
-              strokeDasharray={4} strokeDashoffset={180} 
-              className="line"
-              >
-        </line>
+        <>
+            <line
+            x1={startingPosition.x} y1={startingPosition.y}
+            x2={terminalPosition.x} y2={terminalPosition.y}
+            stroke="#292929" strokeWidth={14} opacity={'50%'}
+            />
+            <path d={subDividePath(4)}
+            stroke="white" strokeWidth={8}
+            className="line"
+             opacity={'50%'}
+             markerMid="url(#arrow)"
+            />
+            
+        </>
+        
     )
 }
 
