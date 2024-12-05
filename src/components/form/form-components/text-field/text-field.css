@@ -1,0 +1,19 @@
+.text-field {
+    align-self: self-start;
+    margin: 4.5px 0px;
+    line-height: 1.5em;
+    text-wrap: wrap;
+    word-wrap: break-word;
+    width: 100%;
+}
+
+.text-field:focus {
+    outline: none;
+    color: #292929
+}
+
+.text-field__display-name {
+    color: rgba(29,29,29);
+    margin: 0px 0px 0px 6px;
+    font-size: 1em;
+}

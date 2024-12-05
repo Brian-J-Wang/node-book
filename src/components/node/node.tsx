@@ -1,8 +1,7 @@
 import { ActionTypes, NodeViewerContext, Position } from "../nodeviewer/nodeviewer"
 import "./node.css"
 import Draggable from "../../properties/draggable/draggable"
-import { MutableRefObject, ReactNode, RefObject, useContext, useEffect, useRef, useState } from "react"
-import { NodeEditorContext } from "../nodeEditor/nodeEditor"
+import { ReactNode, RefObject, useContext, useEffect, useRef, useState } from "react"
 import { contextMenuContext } from "../contextMenu/ContextMenu"
 import ContextMenuBuilder from "../contextMenuBuilder/contextMenuBuilder"
 import createConnection from "../../assets/create-connection.svg"
@@ -12,10 +11,12 @@ import { NodeProps, NodeType } from "./interfaces"
 import ItemNode, { ItemNodeProps } from "./item-node/item-node"
 import OriginNode from "./origin-node/origin-node"
 import DetectOutOfBounds, { OutofBoundsHandle } from "../../properties/detectOutofBounds/detectOutOfBounds"
+import { SideBarContext } from "../side-bar/sidebar"
 
 export interface SharedNodeFunctions {
     onLeftMouse: () => void,
     getContextMenuItems: () => ReactNode,
+    getSideBarItems: () => ReactNode
 }
 
 function NodeFactory(node: NodeProps, ref: RefObject<SharedNodeFunctions>): ReactNode  {
@@ -33,13 +34,13 @@ function NodeFactory(node: NodeProps, ref: RefObject<SharedNodeFunctions>): Reac
 const Node : React.FC<{
     node: NodeProps
 }> = ({node}) => {
-    const nodeEditorContext = useContext(NodeEditorContext);
     const [outlineClasses, setOutlineClasses] = useState<string>("");
     const outlineClassesStateManager = useRef<NodeOutlineManager>(new NodeOutlineManager(setOutlineClasses))
     const collectionContext = useContext(CollectionContext);
     const childComponent = useRef<SharedNodeFunctions>({
         onLeftMouse: () => {},
-        getContextMenuItems: () => undefined
+        getContextMenuItems: () => undefined,
+        getSideBarItems: () => undefined
     }) as RefObject<SharedNodeFunctions>;
     const boundingElement = useRef<HTMLDivElement>() as RefObject<HTMLDivElement>;
     const boundController = useRef<OutofBoundsHandle>() as RefObject<OutofBoundsHandle>;
@@ -97,41 +98,6 @@ const Node : React.FC<{
         }
     }, [isSelected]);
 
-    useEffect(() => {
-        console.log(outlineClasses);
-    }, [outlineClasses])
-    //TODO: make this suck less
-    function generateOutline() {
-        let className = "n__action-outline"
-
-        if (nodeViewerContext.specialAction == undefined || nodeViewerContext.specialAction.for == node.id) {
-            return className;
-        }
-
-        if (isSelected) {
-            className += " n__action-outline__selected";
-        } else if (isValidTarget()) {
-            if ((nodeViewerContext.specialAction.type === ActionTypes.CreateEdges)) {
-                className += " n__action-outline__constructive";
-            } else if ((nodeViewerContext.specialAction.type === ActionTypes.DeleteEdges)) {
-                className += " n__action-outline__destructive";
-            }
-        }
-
-        return className;
-
-        //invalidTargets and validTargets are mutually exclusive.
-        function isValidTarget() {
-            if (nodeViewerContext.specialAction?.invalidTargets) {
-                return !nodeViewerContext.specialAction.invalidTargets?.includes(node.id);
-            } else if (nodeViewerContext.specialAction?.validTargets) {
-                return nodeViewerContext.specialAction.validTargets?.includes(node.id);
-            } else {
-                return false;
-            }
-        }
-    }
-
     const menuContext = useContext(contextMenuContext);
     const buildContextMenu = () => {
         const childComponentContextMenu = childComponent.current?.getContextMenuItems() ?? <></>; 
@@ -152,18 +118,27 @@ const Node : React.FC<{
         return nodeContextMenu;
     }
     
-
-    function handleMouseClick(evt: React.MouseEvent) {
-        if (evt.button == 0) {
-            setIsSelected(true);
-            boundController.current?.setListen(true);
-            childComponent.current?.onLeftMouse();
-        } else if (evt.button == 2) {
-            menuContext.openContext(buildContextMenu(), {
-                x: evt.clientX,
-                y: evt.clientY
-            });
+    function openContext(evt: React.MouseEvent) {
+        if (evt.button != 2) {
+            return;
         }
+
+        menuContext.openContext(buildContextMenu(), {
+            x: evt.clientX,
+            y: evt.clientY
+        });
+    }
+
+    const sidebarContext = useContext(SideBarContext);
+    function focusNode() {
+        setIsSelected(true);
+        boundController.current?.setListen(true);
+        sidebarContext.openSideBar(childComponent.current?.getSideBarItems());
+    }
+
+    function unfocusNode() {
+        setIsSelected(false);
+        boundController.current?.setListen(false);
     }
 
     function handleDragEnd(position: Position) {
@@ -174,12 +149,11 @@ const Node : React.FC<{
     } 
 
     return (
-        <DetectOutOfBounds boundingElement={boundingElement} ref={boundController} onOutOfBound={() => {
-            setIsSelected(false);
-            boundController.current?.setListen(false);
+        <DetectOutOfBounds ref={boundController} onOutOfBound={() => {
+            unfocusNode();
         }} >
         <Draggable initialPosition={node.position} id={node.id} className="node" onDragEnd={handleDragEnd}>
-                <div ref={boundingElement} className={outlineClasses} onMouseDown={handleMouseClick}>
+                <div ref={boundingElement} className={outlineClasses} onClick={focusNode} onMouseDown={openContext} data-bounding-element>
                     {
                         NodeFactory(node, childComponent)
                     }

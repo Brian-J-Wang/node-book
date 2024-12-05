@@ -5,6 +5,7 @@ import NodeViewer from './components/nodeviewer/nodeviewer'
 import NodeEditor from './components/nodeEditor/nodeEditor'
 import GlobalDragController from './properties/draggable/globalDragController'
 import Collection from './components/collection/Collection'
+import SideBar from './components/side-bar/sidebar'
 
 function App() {
 
@@ -16,16 +17,16 @@ function App() {
 
 
   return (
-    <div className='app' style={{overflow: 'hidden'}}>
+    <div className='app'>
       <div >
         <Collection>
-          <GlobalDragController>
-            <ContextMenu>
-              <NodeEditor>
-                <NodeViewer/>
-              </NodeEditor>
-            </ContextMenu>
-          </GlobalDragController>
+        <GlobalDragController>
+          <ContextMenu>
+          <SideBar>
+            <NodeViewer/>
+          </SideBar>
+          </ContextMenu>
+        </GlobalDragController>
         </Collection>
       </div>
     </div>

@@ -1,7 +1,8 @@
 import { forwardRef, ReactNode, useImperativeHandle } from "react";
 import FormSection from "./formSection";
-import MultiSelect from "./form-components/MultiSelect";
-import TextField from "./form-components/TextField";
+import MultiSelect from "./form-components/multi-select";
+import TextField, { TextFieldProps } from "./form-components/text-field/text-field";
+import { RadioSelect, RadioChoice } from "./form-components/radio-select/radio-select";
 
 type FormProps = {
     children: ReactNode,
@@ -28,15 +29,19 @@ const Form = forwardRef<FormHandle, FormProps>(({children, name}, ref) => {
 })
 
 type FormType = React.ForwardRefExoticComponent<FormProps & React.RefAttributes<FormHandle>> & {
-    TextField: React.FC<any>,
+    TextField: React.FC<TextFieldProps>,
     MultiSelect: React.FC<any>,
-    Section: React.FC<any>
+    Section: React.FC<any>,
+    RadioSelect: React.FC<any>,
+    RadioSelectChoice: React.FC<any>,
 }
 
-const FormWithComponents = Form as FormType;
+const FormBuilder = Form as FormType;
 
-FormWithComponents.TextField = TextField;
-FormWithComponents.MultiSelect = MultiSelect;
-FormWithComponents.Section = FormSection;
+FormBuilder.TextField = TextField;
+FormBuilder.MultiSelect = MultiSelect;
+FormBuilder.Section = FormSection;
+FormBuilder.RadioSelect = RadioSelect;
+FormBuilder.RadioSelectChoice = RadioChoice;
 
-export default FormWithComponents;
+export default FormBuilder;

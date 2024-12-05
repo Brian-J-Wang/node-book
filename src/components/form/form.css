@@ -20,26 +20,11 @@
     z-index: 5;
 }
 
-.form__multi-line-input {
-
-}
-
-.form__multi-select {
-    
-
-}
-
 .form__text-field {
+    align-self: self-start;
     margin: 4.5px 0px;
     text-wrap: wrap;
-}
-
-.form__text-field__placeholder {
-    color: rgba(29,29,29,0.4);
-}
-
-.form__text-field__string {
-    color: rgba(29, 29, 29);
+    
 }
 
 .form__text-field:focus {

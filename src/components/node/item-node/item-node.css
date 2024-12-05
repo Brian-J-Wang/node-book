@@ -1,7 +1,42 @@
 .item-node__container {
+    min-width: 200px;
     width: 200px;
     background-color: white;
     border: 1px solid #292929;
     border-radius: 7px;
     box-shadow: 2px 2px #292929;
 }
+
+.item-node__header {
+    display: flex;
+    align-items: center;
+}
+
+.item-node__check-box {
+    margin-left: 6px;
+    margin: auto 4px;
+    width: 16px;
+    height: 16px;
+}
+
+.item-node__title {
+    margin: 0;
+}
+
+.item-node__body {
+    border-top: 1px dashed #292929;
+}
+
+.item-node__description {
+    display: block;
+    margin: 0px;
+    padding: 2px 6px;
+    font-size: 0.8em;
+    width: 100%;
+    line-height: 1.2em;
+    max-height: calc(12em + 4px);
+    box-sizing: border-box;
+    word-wrap: break-word;
+    overflow: hidden;
+}
+

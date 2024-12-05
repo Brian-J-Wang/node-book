@@ -1,0 +1,28 @@
+.item-node-sb__title {
+    font-size: 1.5em;
+    font-weight: bold;
+    min-width: 100px;
+    width:100%;
+    box-sizing: border-box;
+    outline: none;
+    border: none;
+    background-color: whitesmoke;
+    padding: 2px 6px;
+    border-radius: 5px;
+    text-wrap: wrap;
+}
+
+.item-node-sb__color-picker {
+    width: 16px;
+    height: 16px;
+    margin: 4px;
+    border-radius: 50%;
+}
+
+.item-node-sb__color-picker_none {
+    width: 16px;
+    height: 16px;
+    margin: 4px;
+    border-radius: 50%;
+    border: 1px dashed #292929;
+}

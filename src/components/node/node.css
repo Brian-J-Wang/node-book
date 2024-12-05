@@ -1,3 +1,12 @@
+@keyframes background-pan {
+    0% {
+        background-position: 0px 0px;
+    }
+    100% {
+        background-position: 24px 0px;
+    }
+}
+
 .n__action-outline {
     padding: 4px 7px 7px 4px;
     border-radius: 10px;
@@ -8,8 +17,9 @@
 }
 
 .n__action-outline__selected {
-    border-color: #13CDC4;
+    border: 1px solid #13CDC4;
     background-image: url("../../assets/background-selected.svg");
+    animation: background-pan 1s linear infinite;
 }
 
 .n__action-outline__constructive {

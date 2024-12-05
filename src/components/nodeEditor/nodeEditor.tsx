@@ -31,7 +31,7 @@ const NodeEditor = ({children} : NodeEditorProps) => {
     const suppressEditor = useRef<boolean>();
     const handleEditorClose = useRef<() => void>(() => {});
 
-    const openEditor = (title: string, props: NodeProps, onEditorClose: () => void = () => {}) => {
+    const openEditor = (title: string, props: NodeProps, onEditorClose: () => void) => {
         if (suppressEditor.current) {
             return;
         }
@@ -62,7 +62,7 @@ const NodeEditor = ({children} : NodeEditorProps) => {
             suppressEditor.current = suppress;
         },}} >
             {children}
-            <DetectOutOfBounds ref={boundController} boundingElement={boundingElement} onOutOfBound={closeEditor}>
+            <DetectOutOfBounds ref={boundController} onOutOfBound={closeEditor}>
                 <div ref={boundingElement} className="ne" id="nodeEditor" style={{visibility: (activeEditor == null) ? 'hidden' : 'visible'}}>
                     <div className="ne__header">
                         <h2 className="ne__blurb">{editorTitle}</h2>

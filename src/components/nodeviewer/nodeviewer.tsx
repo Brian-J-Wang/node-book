@@ -10,7 +10,7 @@ import { NodeEditorContext } from "../nodeEditor/nodeEditor";
 import { CollectionContext } from "../collection/Collection";
 import NodeRenderer from "../nodeRenderer/nodeRenderer";
 import { NodeType } from "../node/interfaces";
-import { ItemNodeProps } from "../node/item-node/item-node";
+import { ItemNodeProps, NodeColorCode } from "../node/item-node/item-node";
 
 export interface Position {
     x: number;
@@ -60,10 +60,11 @@ const NodeViewer : React.FC = () => {
                     collection.addNode<ItemNodeProps>({
                         id: generateObjectId(),
                         type: NodeType.item,
-                        position: {x: evt.clientX - position.x, y: evt.clientY - position.y},
+                        position: { x: evt.clientX - position.x, y: evt.clientY - position.y },
                         isChecked: false,
-                        title: "Finish This",
-                        description: "This is something that I need to do"
+                        title: "Untitled",
+                        description: "No description",
+                        colorCode: NodeColorCode.none
                     });
                 }}
                 blurb="Add Node"

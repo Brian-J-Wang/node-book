@@ -1,0 +1,19 @@
+.side-bar {
+    width: 360px;
+    max-height: calc(100vh - 30px);
+    margin: 14px 16px 16px 0px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: 1px solid #292929;
+    border-radius: 5px;
+    box-shadow: 2px 2px #292929;
+    background-color: white;
+    padding: 8px;
+    box-sizing: border-box;
+    transition: right 0.2s ease-in-out;
+}
+
+.side-bar__hidden {
+    right: -400px;
+}

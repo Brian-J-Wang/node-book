@@ -7,10 +7,7 @@ import { ItemNodeProps } from "../node/item-node/item-node"
 
 type NodeUpdateProps = {
     id: string,
-    position?: Position,
-    title?: string,
-    description?: string,
-    isComplete?: boolean
+    [key: string]: any
 }
 
 type collectionContextType = {
@@ -67,9 +64,9 @@ const Collection = ({children}: collectionProps) => {
     }
 
     function updateNode(props: NodeUpdateProps) {
-        setNodes(nodes.map((newNode) => {
-            if (newNode.id != props.id) {
-                return newNode;
+        setNodes(nodes.map((nodeCopy) => {
+            if (nodeCopy.id != props.id) {
+                return nodeCopy;
             }
 
             Object.keys(props).forEach((key: string) => {
@@ -77,11 +74,14 @@ const Collection = ({children}: collectionProps) => {
                     return;
                 }
 
-                //@ts-ignore
-                newNode[key] = props[key as keyof NodeProps];
+                //valid keys are defined in the node interfaces. arbitrary keys are allowed but
+                //if it does not exist in the interface, it will not be added to the node.
+                if (key in nodeCopy) {
+                    (nodeCopy as NodeUpdateProps)[key] = props[key as keyof NodeProps];
+                }
             })
 
-            return newNode;
+            return nodeCopy;
         }))
     }
 
