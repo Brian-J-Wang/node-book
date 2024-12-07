@@ -90,12 +90,12 @@ const NodeWrapper : React.FC<NodeProps> = ({node, sidebar, contextMenu, children
         </ContextMenuBuilder>
     )
     
-    function openContext(evt: React.MouseEvent) {
-        evt.stopPropagation();
+    function openContext(evt: React.MouseEvent) {     
         if (evt.button != 2) {
             return;
         }
 
+        evt.stopPropagation();
         menuContext.openContext(buildContextMenu(), {
             x: evt.clientX,
             y: evt.clientY
