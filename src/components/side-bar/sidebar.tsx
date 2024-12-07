@@ -1,6 +1,6 @@
 import { createContext, ReactNode, RefObject, useRef, useState } from "react"
 import { contextNotFound } from "../../utils/defaults";
-import DetectOutOfBounds, { OutofBoundsHandle } from "../../properties/detectOutofBounds/detectOutOfBounds";
+import BoundingBox, { OutofBoundsHandle } from "../../properties/detectOutofBounds/boundingBox";
 
 import "./sidebar.css"
 
@@ -39,12 +39,12 @@ const SideBar = ({children} : SideBarProps) => {
 
     return (
         <SideBarContext.Provider value={{openSideBar, closeSideBar}}>
-        <DetectOutOfBounds ref={boundController} onOutOfBound={closeSideBar}>
+        <BoundingBox ref={boundController} onOutOfBound={closeSideBar}>
             <div className={`side-bar ${!isVisible && 'side-bar__hidden' }`} data-bounding-element>
                 { content }
             </div>
             { children }
-        </DetectOutOfBounds>
+        </BoundingBox>
         </SideBarContext.Provider>
     )
 }

@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useRef, useState } from "react";
-import { Position } from "../../components/nodeviewer/nodeviewer"
+import { Position } from "../../utils/math/position";
 import "./draggable.css"
 import { GlobalDragContext } from "./globalDragController";
 
@@ -9,11 +9,13 @@ type DraggableProps = {
     children?: ReactNode,
     detached?: boolean,
     invertDrag?: boolean,
-    preventDefault?: boolean
-    initialPosition?: Position
+    preventDefault?: boolean,
+    offset?: Position;
+    initialPosition?: Position,
     onDragStart?: (position: Position) => void,
-    onDrag?: (position: Position) => void
-    onDragEnd?: (position: Position) => void
+    onDrag?: (position: Position) => void,
+    onDragEnd?: (position: Position) => void,
+    
 }
 
 type ContextProps = {
@@ -26,7 +28,7 @@ const DraggableContext = createContext<ContextProps>({
     suppressDrag: () => {}
 });
 
-const Draggable = ({className, children, detached, id, initialPosition, invertDrag, onDragStart, onDrag, onDragEnd, preventDefault}: DraggableProps) => {
+const Draggable = ({className, children, detached, id, offset, initialPosition, invertDrag, onDragStart, onDrag, onDragEnd, preventDefault}: DraggableProps) => {
     const [position, setPosition] = useState<Position>(setInitialPosition);
     const dragStartPosition = useRef<Position>({x: 0, y: 0});
     const dragStartClientPosition = useRef<Position>(setInitialPosition());
@@ -121,9 +123,9 @@ const Draggable = ({className, children, detached, id, initialPosition, invertDr
     return (
         <DraggableContext.Provider value={{position, suppressDrag: setSuppress}}>
             <div className={`${className} draggable`} onDragStart={handleDragStart} onDrag={handleDrag} onDragEnd={handleDragEnd} draggable={true} 
-                style={!preventDefault ? {position: 'absolute', 
-                    top: position.y + (!detached ? parentPosition.position.y : 0), 
-                    left: position.x + (!detached ? parentPosition.position.x : 0)} : {}}
+                style={!preventDefault ? { 
+                    top: position.y + (!detached ? parentPosition.position.y : 0) + (offset?.x ?? 0), 
+                    left: position.x + (!detached ? parentPosition.position.x : 0) + (offset?.y ?? 0)} : {}}
                 id={id}>
                     {children}
             </div>

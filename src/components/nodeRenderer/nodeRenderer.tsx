@@ -1,7 +1,7 @@
 import { useContext } from "react"
 import { CollectionContext } from "../collection/Collection"
-import Node from "../node/node"
-import { NodeProps } from "../node/interfaces";
+import OriginNode from "../node/origin-node/origin-node";
+import ItemNode, { ItemNodeObject } from "../node/item-node/item-node";
 
 const NodeRenderer = () => {
     const collectionContext = useContext(CollectionContext);
@@ -10,9 +10,13 @@ const NodeRenderer = () => {
         <>
             {
                 collectionContext.nodes.map((node) => {
-                    return (
-                        <Node key={node.id} node={node}></Node>
-                    )
+                    const type = node.getType();
+
+                    if (type == "origin-node") {
+                        return <OriginNode node={node} key={node.id}/>
+                    } else if (type == "item-node") {
+                        return <ItemNode node={node as ItemNodeObject} key={node.id}/>
+                    }
                 })
             }
         </>

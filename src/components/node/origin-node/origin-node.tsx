@@ -1,18 +1,50 @@
-import { forwardRef, useCallback, useContext, useImperativeHandle } from "react"
-import { NodeProps } from "../interfaces"
+import { ReactNode } from "react"
 import "./origin-node.css"
-import { SharedNodeFunctions } from "../node"
-import { NodeEditorContext } from "../../nodeEditor/nodeEditor"
+import NodeWrapper from "../node-wrapper"
+import NodeObject, { NodeObjectBuilder, NodeValidationObject } from "../node-object"
+import { Position } from "../../../utils/math/position"
 
-interface OriginNodeComponentProps {
-    node: NodeProps
+export class OriginNodeObject extends NodeObject {
+    constructor(position: Position, id?: string) {
+        super(position, id);
+    }
+
+    getType(): string {
+        return "origin-node";
+    }
+
+    //it cannot have edges that ends in it
+    //there cannot be more than two instances of it
+    validate(nodes: NodeObject[], edges: any): NodeValidationObject {
+        return this.validationMessage
+    }
+
+    getComponent(): ReactNode {
+        return (
+            <OriginNode node={this} key={this.id}/>
+        );
+    }
+
+    builder(): NodeObjectBuilder {
+        return new OriginNodeBuilder(this);
+    }
 }
 
-const OriginNode = forwardRef<SharedNodeFunctions, OriginNodeComponentProps>(({node}, ref) => {
-    useImperativeHandle(ref, () => ({
-        onLeftMouse: () => {},
-        getContextMenuItems: () => <></>,
-        getSideBarItems: () => (
+class OriginNodeBuilder extends NodeObjectBuilder {
+    node: OriginNodeObject;
+    constructor(source: OriginNodeObject) {
+        super(source);
+        this.node = new OriginNodeObject({x: 0, y: 0});
+        this.node = Object.assign(this.node, source);
+    }
+}
+
+interface OriginNodeProps {
+    node: OriginNodeObject;
+}
+
+const OriginNode = ({node}: OriginNodeProps) => {
+    const sideBar = (
         <>
             <h3 style={{margin: 0}}>The Start Node</h3>
             <p>
@@ -28,14 +60,20 @@ const OriginNode = forwardRef<SharedNodeFunctions, OriginNodeComponentProps>(({n
                 The only rule for the nodes is that there must be a path that can be traced from the
                 start node to the node.
             </p>
-        </>)
-    }))
+        </>
+    );
 
     return (
-        <div className="origin-node">           
-            Start Here
-        </div>
+        <NodeWrapper 
+            node={node} 
+            sidebar={sideBar} 
+            contextMenu={<></>}>
+            <div className="origin-node">           
+                Start Here
+            </div>
+        </NodeWrapper>
+        
     )
-})
+}
 
 export default OriginNode

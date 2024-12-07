@@ -19,7 +19,7 @@ export const RadioSelect = ({ children, formName, displayName, intialChecked, on
                     React.cloneElement<RadioChoiceProps>(child as React.ReactElement<RadioChoiceProps>,
                         {
                             groupName: formName,
-                            checked: child.props.name == intialChecked,
+                            checked: child.props.id == intialChecked,
                             onChange: onChange
                         }
                     ) : <></>)
@@ -30,7 +30,7 @@ export const RadioSelect = ({ children, formName, displayName, intialChecked, on
 }
 
 type RadioChoiceProps = {
-    name?: string,
+    id?: string,
     children: ReactNode
     groupName: string,
     checked: boolean
@@ -42,8 +42,8 @@ export const RadioChoice : React.FC<RadioChoiceProps> = (props) => {
         <>
             <input type="radio" className="radio-select__radio-input" name={props.groupName} 
             onChange={props.onChange}
-            id={props.name} defaultChecked={props.checked} hidden/>
-            <label htmlFor={props.name} className="radio-select__choice">
+            id={props.id} defaultChecked={props.checked} hidden/>
+            <label htmlFor={props.id} className="radio-select__choice">
                 {props.children}
             </label>
         </>

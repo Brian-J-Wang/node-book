@@ -5,7 +5,7 @@ import Form, { FormHandle } from "../form/form";
 import { NodeProps } from "../node/interfaces";
 
 import Button from "../shared/button/button";
-import DetectOutOfBounds, { OutofBoundsHandle } from "../../properties/detectOutofBounds/detectOutOfBounds";
+import BoundingBox, { OutofBoundsHandle } from "../../properties/detectOutofBounds/boundingBox";
 
 type NodeEditorProps = {
     children: ReactNode
@@ -62,7 +62,7 @@ const NodeEditor = ({children} : NodeEditorProps) => {
             suppressEditor.current = suppress;
         },}} >
             {children}
-            <DetectOutOfBounds ref={boundController} onOutOfBound={closeEditor}>
+            <BoundingBox ref={boundController} onOutOfBound={closeEditor}>
                 <div ref={boundingElement} className="ne" id="nodeEditor" style={{visibility: (activeEditor == null) ? 'hidden' : 'visible'}}>
                     <div className="ne__header">
                         <h2 className="ne__blurb">{editorTitle}</h2>
@@ -72,7 +72,7 @@ const NodeEditor = ({children} : NodeEditorProps) => {
                         <Form.MultiSelect name="Tags"/>
                     </Form>
                 </div>
-            </DetectOutOfBounds>
+            </BoundingBox>
         </NodeEditorContext.Provider>
     )
 }

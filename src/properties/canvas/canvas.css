@@ -1,0 +1,19 @@
+.draggable-canvas {
+    position: relative;
+    overflow: scroll;
+    width: 100vw;
+    height: 100vh;
+
+    /*hides the scrollbar*/
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none; /* For Internet Explorer and Edge */
+    ::-webkit-scrollbar { /* For WebKit-based browsers */
+        display: none;
+    }
+    
+}
+
+.draggable-canvas__dimension-element {
+    background-image: url("../../assets/Grid.svg");
+    background-size: 250px;
+}

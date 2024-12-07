@@ -1,9 +1,8 @@
 import { createContext, ReactNode, useState } from "react"
-import { NodeProps, NodeType } from "../node/interfaces"
+import { NodeProps } from "../node/interfaces"
 import { EdgeProps } from "../edge/edge"
-import { generateObjectId } from "../../utils/uuidGen"
-import { Position } from "../nodeviewer/nodeviewer"
-import { ItemNodeProps } from "../node/item-node/item-node"
+import NodeObject from "../node/node-object"
+import { OriginNodeObject } from "../node/origin-node/origin-node"
 
 type NodeUpdateProps = {
     id: string,
@@ -11,12 +10,11 @@ type NodeUpdateProps = {
 }
 
 type collectionContextType = {
-    nodes: NodeProps[],
+    nodes: NodeObject[],
     edges: EdgeProps[],
-    addNode: <T extends NodeProps>(props: T) => void,
+    addNode: (props: NodeObject) => void,
+    updateNode: (props: NodeObject) => void
     removeNode: (id: string) => void,
-    updateNode: (props: NodeUpdateProps) => void
-    getNodeEdges: (id: string) => EdgeProps[],
     getValidDeleteTargets: (id: string) => string[],
     getInvalidConnectTargets: (id: string) => string[]
     addEdge: (props: EdgeProps) => void,
@@ -26,9 +24,8 @@ export const CollectionContext = createContext<collectionContextType>({
     nodes: [],
     edges: [],
     addNode: () => {},
-    removeNode: () => {},
     updateNode: () => {},
-    getNodeEdges: () => [],
+    removeNode: () => {},
     getValidDeleteTargets: () => [],
     getInvalidConnectTargets: () => [],
     addEdge: () => {},
@@ -39,23 +36,13 @@ type collectionProps = {
     children: ReactNode;
 }
 const Collection = ({children}: collectionProps) => {
-    const [nodes, setNodes] = useState<(NodeProps | ItemNodeProps)[]>([
-        {
-            id: generateObjectId(),
-            type: NodeType.origin,
-            position: {x: 600, y: 400}
-        }
+    const [nodes, setNodes] = useState<(NodeObject)[]>([
+        new OriginNodeObject({x: 2500, y: 2500})
     ]);
-    const [edges, setEdges] = useState<EdgeProps[]>([
+    const [edges, setEdges] = useState<EdgeProps[]>([]);
 
-    ]);
-
-    function getNode(id: string): NodeProps | undefined {
-        return nodes.find(node => node.id == id);
-    }
-
-    function addNode<T extends NodeProps>(props: T): void {
-        setNodes([ ...nodes, props ]);
+    function addNode(node: NodeObject): void {
+        setNodes([ ...nodes, node]);
     }
 
     function removeNode(id: string): void {
@@ -63,30 +50,9 @@ const Collection = ({children}: collectionProps) => {
         setEdges(edges.filter(edge => edge.startingNode != id && edge.terminalNode != id));
     }
 
-    function updateNode(props: NodeUpdateProps) {
-        setNodes(nodes.map((nodeCopy) => {
-            if (nodeCopy.id != props.id) {
-                return nodeCopy;
-            }
-
-            Object.keys(props).forEach((key: string) => {
-                if (key == props.id) {
-                    return;
-                }
-
-                //valid keys are defined in the node interfaces. arbitrary keys are allowed but
-                //if it does not exist in the interface, it will not be added to the node.
-                if (key in nodeCopy) {
-                    (nodeCopy as NodeUpdateProps)[key] = props[key as keyof NodeProps];
-                }
-            })
-
-            return nodeCopy;
-        }))
-    }
-
-    function getNodeEdges(id: string): EdgeProps[] {
-        return [];
+    function updateNode(updatedNode: NodeObject) {
+        console.log(updatedNode);
+        setNodes(nodes.map((node) => (node.id == updatedNode.id) ? updatedNode : node));
     }
 
     enum ConnectionType {
@@ -151,7 +117,7 @@ const Collection = ({children}: collectionProps) => {
     }
 
     return (
-        <CollectionContext.Provider value={{nodes, edges, addNode, removeNode, updateNode, getNodeEdges, getValidDeleteTargets, getInvalidConnectTargets, addEdge, removeEdge}}>
+        <CollectionContext.Provider value={{nodes, edges, addNode, removeNode, updateNode, getValidDeleteTargets, getInvalidConnectTargets, addEdge, removeEdge}}>
             {children}
         </CollectionContext.Provider>
     )

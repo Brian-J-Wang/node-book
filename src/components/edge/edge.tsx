@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react"
-import { Position } from "../nodeviewer/nodeviewer"
+import { useContext, useEffect, useRef, useState } from "react"
+import { Position } from "../../utils/math/position"
 
 import "./edge.css"
+import { CanvasContext } from "../../properties/canvas/canvas"
 
 export type EdgeProps = {
     startingNode: string,
@@ -9,11 +10,12 @@ export type EdgeProps = {
     marker?: string
 }
 
-const Edge : React.FC<EdgeProps> = ({ startingNode, terminalNode, marker}) => {
+const Edge : React.FC<EdgeProps> = ({ startingNode, terminalNode }) => {
     const [startingPosition, setStartingPosition] = useState<Position>({x: 0, y: 0});
     const startingElement = useRef<HTMLElement | null>(null);
     const [terminalPosition, setTerminalPosition] = useState<Position>({x: 0, y: 0});
     const terminalElement = useRef<HTMLElement | null>(null);
+    const canvasContext = useContext(CanvasContext);
 
     useEffect(() => {
         startingElement.current = document.getElementById(startingNode);
@@ -49,8 +51,8 @@ const Edge : React.FC<EdgeProps> = ({ startingNode, terminalNode, marker}) => {
             const rect = element.getBoundingClientRect();
 
             return {
-                x: rect.x + (rect.width / 2),
-                y: rect.y + (rect.height / 2)
+                x: rect.x + (canvasContext.viewPortPosition.current?.x ?? 0) + (rect.width / 2),
+                y: rect.y + (canvasContext.viewPortPosition.current?.y ?? 0) + (rect.height / 2)
             };
         } else {
             return {

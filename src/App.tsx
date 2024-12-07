@@ -1,18 +1,21 @@
 import { useEffect } from 'react'
 import './App.css'
 import ContextMenu from './components/contextMenu/ContextMenu'
-import NodeViewer from './components/nodeviewer/nodeviewer'
-import NodeEditor from './components/nodeEditor/nodeEditor'
 import GlobalDragController from './properties/draggable/globalDragController'
 import Collection from './components/collection/Collection'
 import SideBar from './components/side-bar/sidebar'
+import DraggableCanvas from './properties/canvas/canvas'
 
 function App() {
 
   useEffect(() => {
-    document.addEventListener('contextmenu', (evt) => {
-      evt.preventDefault();
-    });
+    const prevent = (evt: any) => { evt.preventDefault()}
+
+    document.addEventListener('contextmenu', prevent);
+
+    return () => {
+      document.removeEventListener('contextmenu', prevent);
+    }
   })
 
 
@@ -23,7 +26,7 @@ function App() {
         <GlobalDragController>
           <ContextMenu>
           <SideBar>
-            <NodeViewer/>
+          <DraggableCanvas/>
           </SideBar>
           </ContextMenu>
         </GlobalDragController>

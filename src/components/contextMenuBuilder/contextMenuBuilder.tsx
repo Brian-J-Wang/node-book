@@ -16,7 +16,7 @@ const ContextMenuBuilder = ({children}: CMBProps) => {
 }
 
 type CMBOptionProps = {
-    onClick: (evt: any) => void,
+    onClick: (evt: React.MouseEvent) => void,
     blurb: string
     image?: string,
 }
@@ -24,7 +24,7 @@ type CMBOptionProps = {
 const CMOption : React.FC<CMBOptionProps> = ({ onClick, blurb, image }) => {
     const menuContext = useContext(contextMenuContext);
 
-    function handleMouseDown(evt : any) {
+    function handleMouseDown(evt : React.MouseEvent) {
         onClick(evt);
         menuContext.closeContext();
     }

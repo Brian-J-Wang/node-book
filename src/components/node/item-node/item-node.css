@@ -40,3 +40,10 @@
     overflow: hidden;
 }
 
+.item-node-sb__color-picker {
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+    box-sizing: border-box;
+    margin: 8px;
+}

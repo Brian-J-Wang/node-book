@@ -1,6 +1,6 @@
 import { createContext, ReactNode, RefObject, useRef, useState } from "react";
-import { Position } from "../nodeviewer/nodeviewer";
-import DetectOutOfBounds, { OutofBoundsHandle } from "../../properties/detectOutofBounds/detectOutOfBounds";
+import { Position } from "../../utils/math/position";
+import BoundingBox, { OutofBoundsHandle } from "../../properties/detectOutofBounds/boundingBox";
 
 export const contextMenuContext = createContext<{
     openContext: (menu: ReactNode, position: Position) => void,
@@ -13,7 +13,6 @@ export const contextMenuContext = createContext<{
 const ContextMenu : React.FC<{children: ReactNode}> = ({children}) => {
     const [menu, setMenu] = useState<ReactNode>(null);
     const [position, setPosition] = useState<Position>({x: 0, y: 0});
-    const boundingElement = useRef<HTMLDivElement>() as RefObject<HTMLDivElement>;
     const boundController = useRef<OutofBoundsHandle>() as RefObject<OutofBoundsHandle>;
 
     const openContextMenu = (newMenu: ReactNode, position: Position) => {
@@ -36,11 +35,11 @@ const ContextMenu : React.FC<{children: ReactNode}> = ({children}) => {
 
     return (
         <contextMenuContext.Provider value={{openContext: openContextMenu, closeContext: closeContextMenuInternal}}>
-            <DetectOutOfBounds ref={boundController} boundingElement={boundingElement} onOutOfBound={closeContextMenu}>
-                <div ref={boundingElement} className="cm_"style={{position: 'absolute', top: position.y, left: position.x, zIndex: 3}}>
+            <BoundingBox ref={boundController} onOutOfBound={closeContextMenu}>
+                <div className="cm_"style={{position: 'absolute', top: position.y, left: position.x, zIndex: 3}}>
                     {menu}
                 </div>
-            </DetectOutOfBounds>
+            </BoundingBox>
             {children}
         </contextMenuContext.Provider>
     )

@@ -1,9 +1,10 @@
 import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from "react"
 import Edge, { EdgeProps } from "../edge/edge"
-import { Position } from "../nodeviewer/nodeviewer"
+import { Position } from "../../utils/math/position"
 
 import "./edgeRenderer.css"
 import { CollectionContext } from "../collection/Collection"
+import { CanvasContext } from "../../properties/canvas/canvas"
 
 export type edgeRendererHandle = {
     startDrawing: (startingPosition: Position) => void
@@ -17,6 +18,7 @@ const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>(({}, ref)
     const collection = useContext(CollectionContext);
     const [isDrawing, setIsDrawing] = useState<boolean>(false);
     const [drawStart, setDrawStart] = useState<Position>({x: 0, y: 0});
+    const canvasContext = useContext(CanvasContext);
 
     useImperativeHandle(ref, () => ({
         startDrawing: (start) => {
@@ -61,7 +63,7 @@ const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>(({}, ref)
     }, []);
 
     return(
-        <svg className="edge-renderer" viewBox={`0 0 ${viewPortSize.x} ${viewPortSize.y}`}  width={viewPortSize.x} height={viewPortSize.y}>
+        <svg className="edge-renderer" viewBox={`0 0 5000 5000`}  width={5000} height={5000}>
             <defs>
                 <marker id="arrow" 
                     markerWidth="15"
@@ -74,7 +76,9 @@ const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>(({}, ref)
                 </marker>
             </defs>
             {isDrawing ? (
-                <line x1={drawStart.x} y1={drawStart.y} x2={mousePosition.x} y2={mousePosition.y} className="edge-renderer__fake-line" markerEnd="url(#arrow)"/>
+                <line x1={drawStart.x} y1={drawStart.y} 
+                    x2={mousePosition.x + (canvasContext.viewPortPosition.current?.x ?? 0)} 
+                    y2={mousePosition.y + (canvasContext.viewPortPosition.current?.y ?? 0)} className="edge-renderer__fake-line" markerEnd="url(#arrow)"/>
             ) : (<></>)}
             {
                 collection.edges.map((edge) => {

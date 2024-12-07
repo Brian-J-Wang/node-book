@@ -1,4 +1,4 @@
-import { Position } from "../nodeviewer/nodeviewer";
+import { Position } from "../../utils/math/position";
 
 export enum NodeType {
     origin,
