@@ -27,6 +27,15 @@
     border-top: 1px dashed #292929;
 }
 
+.item-node__color-tag {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+}
+
 .item-node__description {
     display: block;
     margin: 0px;

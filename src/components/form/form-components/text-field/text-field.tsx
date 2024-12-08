@@ -27,7 +27,7 @@ const TextField = ({ placeholder, initialValue, onUpdate }: TextFieldProps) => {
     
     return (
         <div>
-            <p className="text-field__display-name"> Description </p>
+            <h3 className="text-field__display-name"> Description </h3>
             <div className="form__input"
                 style={{minHeight: `calc(9em + 9px)`}}>
                 

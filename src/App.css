@@ -10,8 +10,26 @@
     border-bottom: 1px solid #292929;
 }
 
-h1 { font-size: 32.9307px; }
-h2 { font-size: 25.8885px; }
-h3 { font-size: 20.3523px; }
-p { font-size: 16px; }
-small { font-size: 12.5784px; }
+* {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+h1 { 
+    font-size: 32.9307px; 
+}
+h2 { 
+    font-size: 25.8885px; 
+}
+h3 { 
+    font-size: 20.3523px; 
+}
+p { 
+    font-size: 16px; 
+}
+small { 
+    font-size: 12.5784px; 
+}
+input { 
+    font-size: 12.5784px; 
+    font-weight: 400;
+}

@@ -1,4 +1,4 @@
-import React, { forwardRef, ReactNode, RefObject, useEffect, useImperativeHandle, useRef, useState } from "react"
+import { forwardRef, ReactNode, RefObject, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { Position } from "../../utils/math/position";
 
 type BoundingBoxProps = {

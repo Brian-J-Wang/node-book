@@ -1,4 +1,4 @@
-import { ReactNode, useContext } from "react";
+import { ReactNode, useContext, useState } from "react";
 import "./item-node.css"
 import NodeWrapper from "../node-wrapper";
 import ContextMenuBuilder from "../../contextMenuBuilder/contextMenuBuilder";
@@ -7,6 +7,7 @@ import NodeObject, { NodeObjectBuilder } from "../node-object";
 import { Position } from "../../../utils/math/position";
 import FormBuilder from "../../form/form";
 import { OriginNodeObject } from "../origin-node/origin-node";
+import CheckList from "../../form/form-components/check-list/check-list";
 
 
 type ColorCode = "none" | "green" | "yellow" | "red" | "blue" | "purple";
@@ -114,10 +115,16 @@ const ItemNode = ({node} : ItemNodeProps) => {
         </>
     )
 
+    const getColorSwatch = (code: ColorCode) => {
+        return colors.find(color => color.code == code)?.color;
+    }
+
+    console.log(node);
+
     return (
         <NodeWrapper 
             node={node} 
-            sidebar={<ItemNodeSideBar node={node} key={node.id}/>} 
+            sidebar={<ItemNodeSideBar inputNode={node} key={node.id}/>} 
             contextMenu={contextMenu}>
             <div className="item-node__container">
                 <div className="item-node__header">
@@ -135,28 +142,37 @@ const ItemNode = ({node} : ItemNodeProps) => {
                         </div>
                     )
                 }
+                <div style={{backgroundColor: getColorSwatch(node.colorCode)}} 
+                className="item-node__color-tag" hidden={node.colorCode == "none"}></div>
             </div>
         </NodeWrapper>
     )
 }
 
-
-const ItemNodeSideBar: React.FC<{node: ItemNodeObject}> = ({node}) => {
+//@devcl [] refactor: find some way to have the input node updating without having to have duplicate node variable
+//          in the component.
+const ItemNodeSideBar: React.FC<{inputNode: ItemNodeObject}> = ({inputNode}) => {
     const collection = useContext(CollectionContext);
+    const [node, setNode] = useState<ItemNodeObject>(inputNode);
 
-    const handleColorCodeChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-        collection.updateNode(node.builder().colorCode(evt.target.id as ColorCode).complete());
+    console.log(node);
+
+    const updateNode = (update: ItemNodeObject) => {
+        collection.updateNode(update);
+        setNode(update);
     }
 
     return (
         <>
             <input type="text" className="item-node-sb__title" defaultValue={node.title} onChange={(evt) => {
-                collection.updateNode(node.builder().title(evt.target.value).complete());
+                updateNode(node.builder().title(evt.target.value).complete() as ItemNodeObject);
             }}/>
             <FormBuilder name={"node form"}>
                 <FormBuilder.Section>
                     <FormBuilder.RadioSelect displayName="Color Code" formName="color-code" 
-                    intialChecked={node.colorCode} onChange={handleColorCodeChange}>
+                    intialChecked={node.colorCode} onChange={(evt: React.ChangeEvent) => {
+                        updateNode(node.builder().colorCode(evt.target.id as ColorCode).complete() as ItemNodeObject);
+                    }}>
                         {
                             colors.map(color => (
                                 <FormBuilder.RadioSelectChoice id={color.code} key={color.code}>
@@ -168,9 +184,14 @@ const ItemNodeSideBar: React.FC<{node: ItemNodeObject}> = ({node}) => {
                     </FormBuilder.RadioSelect>
                     <FormBuilder.TextField placeholder={"description"} initialValue={node.description} 
                         onUpdate={(value: string) => {
-                            collection.updateNode(node.builder().description(value).complete());
+                            updateNode(node.builder().description(value).complete() as ItemNodeObject);
                         }
                     }/>
+                </FormBuilder.Section>
+                <FormBuilder.Section>
+                    <CheckList content={[]} onNewItem={function (): void {
+                        throw new Error("Function not implemented.");
+                    } } checkListName={"Poggers"}/>
                 </FormBuilder.Section>
             </FormBuilder>
         </>

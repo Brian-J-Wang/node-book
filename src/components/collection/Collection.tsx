@@ -51,8 +51,13 @@ const Collection = ({children}: collectionProps) => {
     }
 
     function updateNode(updatedNode: NodeObject) {
-        console.log(updatedNode);
-        setNodes(nodes.map((node) => (node.id == updatedNode.id) ? updatedNode : node));
+        setNodes(nodes.map((node) => {
+            if (node.id == updatedNode.id) {
+                return updatedNode;
+            } else {
+                return node;
+            }
+        }))
     }
 
     enum ConnectionType {

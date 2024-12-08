@@ -12,7 +12,7 @@ interface RadioSelectProps {
 export const RadioSelect = ({ children, formName, displayName, intialChecked, onChange }: RadioSelectProps) => {
     return (
         <div className="radio-select">
-            <p className="radio-select__input-name">{displayName}:</p>
+            <h3 className="radio-select__input-name">{displayName}:</h3>
             <div className="radio-select__inputs">
                 {
                     React.Children.map(children, (child) => React.isValidElement(child) && child.type === RadioChoice ? 
