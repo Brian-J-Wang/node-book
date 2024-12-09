@@ -114,6 +114,17 @@ const colors: { code: ColorCode, color: string }[] = [
 const ItemNode = ({node} : ItemNodeProps) => {
     const collection = useContext(CollectionContext);
 
+    const numCompleteOverTotal = () => {
+        let count = 0;
+        node.checkList.forEach((item) => {
+            if (item.checked) {
+                count++;
+            }
+        });
+
+        return `${count}/${node.checkList.length}`
+    }
+
     const contextMenu = (
         <>
             <ContextMenuBuilder.Divider/>
@@ -130,8 +141,6 @@ const ItemNode = ({node} : ItemNodeProps) => {
         return colors.find(color => color.code == code)?.color;
     }
 
-    console.log(node);
-
     return (
         <NodeWrapper 
             node={node} 
@@ -139,10 +148,17 @@ const ItemNode = ({node} : ItemNodeProps) => {
             contextMenu={contextMenu}>
             <div className="item-node__container">
                 <div className="item-node__header">
-                    <input type="checkbox" className="item-node__check-box" onClick={(evt) => {evt.stopPropagation()}}/>
-                    <h4 className="item-node__title">
-                        {node.title}
-                    </h4>
+                    <div className="item-node__header-left">
+                        <input type="checkbox" className="item-node__check-box" onClick={(evt) => {evt.stopPropagation()}}/>
+                        <h4 className="item-node__title">
+                            {node.title}
+                        </h4>
+                    </div>
+                    <div className="item-node__header-right">
+                        <small className="item-node__check-list-count" hidden={node.checkList.length == 0}>
+                            {numCompleteOverTotal()}
+                        </small>
+                    </div>
                 </div>
                 {
                     node.description != "" && (
@@ -166,7 +182,6 @@ const ItemNodeSideBar: React.FC<{inputNode: ItemNodeObject}> = ({inputNode}) => 
     const collection = useContext(CollectionContext);
     const [node, setNode] = useState<ItemNodeObject>(inputNode);
 
-    console.log(node);
     //@devcl [] refactor: is there a way to allow types that extend from a class be used as a valid type in typescript?
     function updateNode(update: ItemNodeObject) {
         collection.updateNode(update);

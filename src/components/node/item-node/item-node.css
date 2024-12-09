@@ -9,18 +9,30 @@
 
 .item-node__header {
     display: flex;
+    justify-content: space-between;
+    padding: 4px;
+}
+
+.item-node__header-left {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+}
+
+.item-node__header-right {
+    display: flex;
     align-items: center;
 }
 
 .item-node__check-box {
-    margin-left: 6px;
-    margin: auto 4px;
+    margin: 0px;
     width: 16px;
     height: 16px;
 }
 
 .item-node__title {
     margin: 0;
+    line-height: 16px;
 }
 
 .item-node__body {
@@ -47,6 +59,21 @@
     box-sizing: border-box;
     word-wrap: break-word;
     overflow: hidden;
+}
+
+.item-node-sb__title {
+    font-size: 25.8885px;
+    font-weight: 700;
+    box-sizing: border-box;
+    width: 100%;
+    border: none;
+    padding: 0px;
+    outline: none;
+}
+
+.item-node-sb__title:focus {
+    background-color: whitesmoke;
+    border-radius: 4px;
 }
 
 .item-node-sb__color-picker {
