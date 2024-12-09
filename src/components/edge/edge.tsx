@@ -95,13 +95,12 @@ const Edge : React.FC<EdgeProps> = ({ startingNode, terminalNode }) => {
             <line
             x1={startingPosition.x} y1={startingPosition.y}
             x2={terminalPosition.x} y2={terminalPosition.y}
-            stroke="#292929" strokeWidth={14} opacity={'50%'}
+            stroke="#292929" strokeWidth={8} opacity={'100%'}
             />
             <path d={subDividePath(4)}
-            stroke="white" strokeWidth={8}
+            stroke="white" strokeWidth={6}
             className="line"
-             opacity={'50%'}
-             markerMid="url(#arrow)"
+            markerMid="url(#arrow)"
             />
             
         </>

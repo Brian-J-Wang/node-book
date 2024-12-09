@@ -33,3 +33,7 @@ input {
     font-size: 12.5784px; 
     font-weight: 400;
 }
+
+body {
+    margin: 0;
+}

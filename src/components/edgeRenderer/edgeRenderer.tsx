@@ -1,5 +1,5 @@
 import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from "react"
-import Edge, { EdgeProps } from "../edge/edge"
+import Edge from "../edge/edge"
 import { Position } from "../../utils/math/position"
 
 import "./edgeRenderer.css"
@@ -12,9 +12,10 @@ export type edgeRendererHandle = {
 }
 
 type edgeRendererProps = {
+    edgeStyle?: string
 }
 
-const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>(({}, ref) => {
+const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>((props, ref) => {
     const collection = useContext(CollectionContext);
     const [isDrawing, setIsDrawing] = useState<boolean>(false);
     const [drawStart, setDrawStart] = useState<Position>({x: 0, y: 0});
@@ -35,19 +36,9 @@ const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>(({}, ref)
     }));
 
     const [mousePosition, setMousePosition] = useState<Position>({x: 0, y: 0});
-    const [viewPortSize, setViewPortSize] = useState<Position>({
-        x: window.innerWidth, 
-        y: window.innerHeight});
         
     useEffect(() => {
-        function updateViewPortSize() {
-            setViewPortSize({
-                x: window.innerWidth,
-                y: window.innerHeight
-            })
-        }
-        
-        function updateMousePosition(evt: any) {
+        function updateMousePosition(evt: MouseEvent) {
             setMousePosition({
                 x: evt.clientX,
                 y: evt.clientY
@@ -55,10 +46,8 @@ const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>(({}, ref)
         }
 
         document.addEventListener("mousemove", updateMousePosition);
-        window.addEventListener('resize', updateViewPortSize);
         return () => {
             document.removeEventListener("mousemove", updateMousePosition);
-            window.removeEventListener("resize", updateViewPortSize);
         }
     }, []);
 
@@ -66,13 +55,13 @@ const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>(({}, ref)
         <svg className="edge-renderer" viewBox={`0 0 5000 5000`}  width={5000} height={5000}>
             <defs>
                 <marker id="arrow" 
-                    markerWidth="15"
-                    markerHeight="15"
+                    markerWidth="7"
+                    markerHeight="8"
                     markerUnits="userSpaceOnUse"
                     refX="6"
-                    refY="8" 
+                    refY="4" 
                     orient="auto">
-                    <path d="M14 8L2 2L5 8L2 14L14 8Z" fill="#292929" stroke="#292929"/>
+                    <path d="M1 7V1L7 4L1 7Z" fill="#292929" stroke="#292929"/>
                 </marker>
             </defs>
             {isDrawing ? (
