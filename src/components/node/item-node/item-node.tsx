@@ -7,7 +7,7 @@ import NodeObject, { NodeObjectBuilder } from "../node-object";
 import { Position } from "../../../utils/math/position";
 import FormBuilder from "../../form/form";
 import { OriginNodeObject } from "../origin-node/origin-node";
-import CheckList from "../../form/form-components/check-list/check-list";
+import CheckList, { checkListItem } from "../../form/form-components/check-list/check-list";
 
 
 type ColorCode = "none" | "green" | "yellow" | "red" | "blue" | "purple";
@@ -16,6 +16,7 @@ export class ItemNodeObject extends NodeObject {
     title: string;
     description: string;
     colorCode: ColorCode;
+    checkList: checkListItem[];
 
     constructor(position: Position, id?: string) {
         super(position, id);
@@ -23,6 +24,7 @@ export class ItemNodeObject extends NodeObject {
         this.title = "untitled";
         this.description = "no description";
         this.colorCode = "none";
+        this.checkList = [];
     }
 
     getType(): string {
@@ -66,6 +68,15 @@ class ItemNodeBuilder extends NodeObjectBuilder {
     colorCode(value: ColorCode) {
         this.node.colorCode = value;
         return this;
+    }
+
+    checkList(value: checkListItem[]) {
+        this.node.checkList = value;
+        return this;
+    }
+
+    complete() {
+        return this.node;
     }
 }
 
@@ -156,8 +167,8 @@ const ItemNodeSideBar: React.FC<{inputNode: ItemNodeObject}> = ({inputNode}) => 
     const [node, setNode] = useState<ItemNodeObject>(inputNode);
 
     console.log(node);
-
-    const updateNode = (update: ItemNodeObject) => {
+    //@devcl [] refactor: is there a way to allow types that extend from a class be used as a valid type in typescript?
+    function updateNode(update: ItemNodeObject) {
         collection.updateNode(update);
         setNode(update);
     }
@@ -165,13 +176,13 @@ const ItemNodeSideBar: React.FC<{inputNode: ItemNodeObject}> = ({inputNode}) => 
     return (
         <>
             <input type="text" className="item-node-sb__title" defaultValue={node.title} onChange={(evt) => {
-                updateNode(node.builder().title(evt.target.value).complete() as ItemNodeObject);
+                updateNode(node.builder().title(evt.target.value).complete());
             }}/>
             <FormBuilder name={"node form"}>
                 <FormBuilder.Section>
                     <FormBuilder.RadioSelect displayName="Color Code" formName="color-code" 
                     intialChecked={node.colorCode} onChange={(evt: React.ChangeEvent) => {
-                        updateNode(node.builder().colorCode(evt.target.id as ColorCode).complete() as ItemNodeObject);
+                        updateNode(node.builder().colorCode(evt.target.id as ColorCode).complete());
                     }}>
                         {
                             colors.map(color => (
@@ -184,14 +195,14 @@ const ItemNodeSideBar: React.FC<{inputNode: ItemNodeObject}> = ({inputNode}) => 
                     </FormBuilder.RadioSelect>
                     <FormBuilder.TextField placeholder={"description"} initialValue={node.description} 
                         onUpdate={(value: string) => {
-                            updateNode(node.builder().description(value).complete() as ItemNodeObject);
+                            updateNode(node.builder().description(value).complete());
                         }
                     }/>
                 </FormBuilder.Section>
                 <FormBuilder.Section>
-                    <CheckList content={[]} onNewItem={function (): void {
-                        throw new Error("Function not implemented.");
-                    } } checkListName={"Poggers"}/>
+                    <CheckList content={inputNode.checkList} onUpdate={(value: checkListItem[]) => {
+                        updateNode(node.builder().checkList(value).complete());
+                    }} checkListName={"Poggers"}/>
                 </FormBuilder.Section>
             </FormBuilder>
         </>

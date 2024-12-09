@@ -1,13 +1,8 @@
 import { createContext, ReactNode, useState } from "react"
-import { NodeProps } from "../node/interfaces"
 import { EdgeProps } from "../edge/edge"
 import NodeObject from "../node/node-object"
 import { OriginNodeObject } from "../node/origin-node/origin-node"
 
-type NodeUpdateProps = {
-    id: string,
-    [key: string]: any
-}
 
 type collectionContextType = {
     nodes: NodeObject[],

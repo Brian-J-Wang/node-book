@@ -6,7 +6,7 @@ import trashIcon from "../../../../assets/trash-icon.svg"
 import "./check-list.css"
 import "../../../../assets/styles.css"
 
-interface checkListItem {
+export interface checkListItem {
     id: string,
     checked: boolean,
     blurb: string
@@ -14,7 +14,7 @@ interface checkListItem {
 
 type checkListProps = {
     content: checkListItem[]
-    onNewItem: (item: checkListItem) => void
+    onUpdate: (items: checkListItem[]) => void;
     checkListName: string
     showHeader?: boolean
 }
@@ -22,18 +22,7 @@ type checkListProps = {
 const CheckList = (props: checkListProps) => {
     const [ internalId ] = useState(generateObjectId());
     const [ numComplete, setNumComplete] = useState<number>(0);
-    const [ items, setItems ] = useState<checkListItem[]>([
-        {
-            id: generateObjectId(),
-            checked: false,
-            blurb: 'Finish this'
-        },
-        {
-            id: generateObjectId(),
-            checked: false,
-            blurb: 'Finish that'
-        },
-    ]);
+    const [ items, setItems ] = useState<checkListItem[]>(props.content);
 
     useEffect(() => {
         //set the number complete;
@@ -45,34 +34,40 @@ const CheckList = (props: checkListProps) => {
         });
 
         setNumComplete(count);
-    }, [])
+    }, [ props.content ]);
 
     const handleKeyboardInput = (evt: React.KeyboardEvent) => {
         if (evt.key == "Enter") {
             evt.preventDefault();
 
-            setItems([ ...items, {
+            const newState = [ ...items, {
                 id: generateObjectId(),
                 checked: false,
                 blurb: (evt.target as HTMLInputElement).value
-            }]);
+            }]
+            setItems(newState);
+            props.onUpdate(newState);
 
             (evt.target as HTMLInputElement).value = "";
         }
     }
 
     const handleRemoveItem = (id: string) => {
-        setItems(items.filter(item => item.id != id));
+        const newState = items.filter(item => item.id != id)
+        setItems(newState);
+        props.onUpdate(newState);
     } 
 
     const handleCheck = (evt: React.ChangeEvent) => {
-        setItems(items.map((item) => {
+        const newState = items.map((item) => {
             if (item.id == evt.target.id) {
                 item.checked = (evt.target as HTMLInputElement).checked;
             }
 
             return item;
-        }));
+        })
+        setItems(newState);
+        props.onUpdate(newState);
 
         if ((evt.target as HTMLInputElement).checked) {
             setNumComplete((value) => value + 1);
@@ -112,7 +107,7 @@ const CheckListItem = ({content, id, onDelete, onChange}: checkListItemProps) =>
         <div className="check-list-item">
             <label htmlFor={content.id} className="check-list-item__label">
                 <input type="checkbox" id={id} onChange={onChange} checked={content.checked}/>
-                <p className="check-list-item__blurb">{content.blurb}</p>
+                <small className="check-list-item__blurb">{content.blurb}</small>
             </label>
             <img src={trashIcon} alt="delete" className="check-list-item__delete" onClick={() => {
                 onDelete(content.id)

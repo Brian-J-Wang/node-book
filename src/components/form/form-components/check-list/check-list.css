@@ -17,17 +17,22 @@
     box-sizing: border-box;
     cursor: pointer;
     padding-left: 20px;
-    font-size: 16px;
+    font-size: 12.5784px;
+    outline: none;
 }
 
 .check-list__input::placeholder {
     font-weight: 400;
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-size: 12.5784px;
 }
 
 .check-list__input:hover {
     background-color: whitesmoke;
-    
+}
+
+.check-list__input:focus {
+    background-color: whitesmoke;
 }
 
 /* Checklist Items */
