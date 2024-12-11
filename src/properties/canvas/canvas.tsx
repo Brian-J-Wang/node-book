@@ -164,14 +164,14 @@ const DraggableCanvas = () => {
             for: startNode,
             type: actionType,
         };
-        
+
         if (actionType == ActionTypes.DeleteEdges) {
             specialActionState.validTargets = collection.getValidDeleteTargets(startNode);
         } else if (actionType == ActionTypes.CreateEdges) {
             specialActionState.invalidTargets = collection.getInvalidConnectTargets(startNode);
         }
-        setSpecialAction(specialActionState);
         
+        setSpecialAction(specialActionState);
         
         nodeEditorController.suppressEditor(true);
         document.addEventListener("click", handleMouseClick);
@@ -237,7 +237,8 @@ const DraggableCanvas = () => {
                 drawConnection: drawConnection,
                 specialActionComplete: specialActionComplete
             }}>
-            <div onDragStart={handleDragStart} onDrag={handleDrag} onMouseDown={handleClick} className="draggable-canvas" id="draggable-canvas" draggable>
+            <div onDragStart={handleDragStart} onDrag={handleDrag} onMouseDown={handleClick} className="draggable-canvas" 
+            id="draggable-canvas" draggable>
                 <div style={{height: dimensions.y, width: dimensions.x}} className="draggable-canvas__dimension-element">
                     <NodeRenderer/>
                     <EdgeRenderer ref={edgeRendererController} />

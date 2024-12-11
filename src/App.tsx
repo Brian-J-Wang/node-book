@@ -5,6 +5,7 @@ import GlobalDragController from './properties/draggable/globalDragController'
 import Collection from './components/collection/Collection'
 import SideBar from './components/side-bar/sidebar'
 import DraggableCanvas from './properties/canvas/canvas'
+import MetaBanner from './components/metaBanner/meta-banner'
 
 function App() {
 
@@ -18,18 +19,16 @@ function App() {
     }
   })
 
-
   return (
     <div className='app'>
-      <div >
+      <div>
         <Collection>
-        <GlobalDragController>
+          <MetaBanner/>
           <ContextMenu>
           <SideBar>
           <DraggableCanvas/>
           </SideBar>
           </ContextMenu>
-        </GlobalDragController>
         </Collection>
       </div>
     </div>
