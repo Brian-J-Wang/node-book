@@ -1,8 +1,10 @@
 import { ReactNode } from "react"
 import "./origin-node.css"
 import NodeWrapper from "../node-wrapper"
-import NodeObject, { NodeObjectBuilder, NodeValidationObject } from "../node-object"
+import NodeObject, { NodeObjectBuilder, NodeValidationObject, } from "../node-object"
 import { Position } from "../../../utils/math/position"
+import { EdgeProps } from "../../edge/edge"
+import ValidationNotification from "../components/validation-notification"
 
 export class OriginNodeObject extends NodeObject {
     constructor(position: Position, id?: string) {
@@ -13,10 +15,31 @@ export class OriginNodeObject extends NodeObject {
         return "origin-node";
     }
 
-    //it cannot have edges that ends in it
-    //there cannot be more than two instances of it
-    validate(nodes: NodeObject[], edges: any): NodeValidationObject {
-        return this.validationMessage
+    validate(nodes: NodeObject[], edges: EdgeProps[]): NodeValidationObject {
+        //there cannot be more than two instances of it.
+        for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i].getType() == "origin-node" && nodes[i].id != this.id) {
+                return {
+                    isValid: false,
+                    message: "Multiple copies of origin node is not allowed to exist."
+                };
+            }
+        }
+
+        //edges cannot lead to this node
+        for (let i = 0; i < edges.length; i++) {
+            if (edges[i].terminalNode == this.id) {
+                return {
+                    isValid: false,
+                    message: "Origin node is not allowed to have paths leading to it."
+                };
+            }
+        }
+
+        return {
+            isValid: true,
+            message: ""
+        }
     }
 
     getComponent(): ReactNode {
@@ -60,15 +83,22 @@ const OriginNode = ({node}: OriginNodeProps) => {
                 The only rule for the nodes is that there must be a path that can be traced from the
                 start node to the node.
             </p>
+            <ValidationNotification validation={
+                node.validationMessage
+            }/>
         </>
     );
+
+    const validationClass = (node.validationMessage.isValid)
+    ? ""
+    : "origin-node__invalid"
 
     return (
         <NodeWrapper 
             node={node} 
             sidebar={sideBar} 
             contextMenu={<></>}>
-            <div className="origin-node">           
+            <div className={"origin-node " + validationClass}>           
                 Start Here
             </div>
         </NodeWrapper>

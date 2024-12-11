@@ -1,7 +1,7 @@
 import { Position } from "../../utils/math/position"
 import "./node.css"
 import Draggable from "../../properties/draggable/draggable"
-import { ReactNode, RefObject, useContext, useEffect, useRef, useState } from "react"
+import { ReactNode, RefObject, SetStateAction, useContext, useEffect, useRef, useState } from "react"
 import { contextMenuContext } from "../contextMenu/ContextMenu"
 import ContextMenuBuilder from "../contextMenuBuilder/contextMenuBuilder"
 import createConnection from "../../assets/create-connection.svg"
@@ -146,7 +146,7 @@ class NodeOutlineManager {
     stateFunction: (string: string) => void;
     baseString = "n__action-outline"
 
-    constructor(stateFunction: React.Dispatch<any>) {
+    constructor(stateFunction: React.Dispatch<SetStateAction<string>>) {
         this.stateFunction = stateFunction;
     }
 

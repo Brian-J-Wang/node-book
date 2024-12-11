@@ -1,15 +1,11 @@
 import { ReactNode } from "react";
 import { Position } from "../../utils/math/position";
 import { generateObjectId } from "../../utils/uuidGen";
+import { EdgeProps } from "../edge/edge";
 
 export type NodeValidationObject = {
     isValid: boolean,
     message: string
-}
-
-export const defaultNodeValidationObject: NodeValidationObject = {
-    isValid: true,
-    message: ""
 }
 
 export default class NodeObject {
@@ -35,9 +31,11 @@ export default class NodeObject {
         return (<></>)
     }
 
-    validate(nodes: any, edges: any): NodeValidationObject {
-        console.error("validate not set-up for parent class");
-        return defaultNodeValidationObject;
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    validate(nodes: NodeObject[], edges: EdgeProps[]): NodeValidationObject {
+        console.error("validate not set-up for abstract method");
+        return this.validationMessage;
     }
 
     builder() {

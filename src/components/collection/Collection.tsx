@@ -46,13 +46,17 @@ const Collection = ({children}: collectionProps) => {
     }
 
     function updateNode(updatedNode: NodeObject) {
-        setNodes(nodes.map((node) => {
+        const updatedNodes = nodes.map((node) => {
             if (node.id == updatedNode.id) {
                 return updatedNode;
             } else {
                 return node;
             }
-        }))
+        });
+
+        console.log(updatedNode.validate(updatedNodes, edges));
+
+        setNodes(updatedNodes);
     }
 
     enum ConnectionType {
@@ -95,6 +99,7 @@ const Collection = ({children}: collectionProps) => {
             upstreamVisited.push(current);
 
             const connectedNodes = getConnectedNodes(current, ConnectionType.upStream);
+            console.log(connectedNodes);
 
             stack.push( ...connectedNodes );
         }
@@ -105,15 +110,33 @@ const Collection = ({children}: collectionProps) => {
     }
 
     function addEdge(props: EdgeProps) {
-        setEdges([ ...edges, props ]);
+        const newEdges = [ ...edges, props ]
+        setEdges(newEdges);
+        setNodes(nodes.filter((node) => {
+            if (node.id == props.startingNode || node.id == props.terminalNode) {
+                node.validationMessage = node.validate(nodes, newEdges);
+                return node.builder().complete();
+            } else {
+                return node;
+            }
+        }))
     }
 
     function removeEdge(from: string, to: string) {
-        console.log("removing edge");
-        setEdges(edges.filter((edge) => {
+        const newEdges = edges.filter((edge) => {
             return !((edge.startingNode == from || edge.startingNode == to) &&
             (edge.terminalNode == from || edge.terminalNode == to))
-        }));
+        });
+        setEdges(newEdges);
+
+        setNodes(nodes.filter((node) => {
+            if (node.id == from || node.id == to) {
+                node.validationMessage = node.validate(nodes, newEdges);
+                return node.builder().complete();
+            } else {
+                return node;
+            }
+        }))
     }
 
     return (

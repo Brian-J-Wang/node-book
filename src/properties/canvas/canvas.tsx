@@ -28,6 +28,7 @@ type CanvasContext = {
     drawConnection: (nodeId: string, type: ActionTypes) => void
     specialActionComplete: () => void
 }
+// eslint-disable-next-line react-refresh/only-export-components
 export const CanvasContext = createContext<CanvasContext>({
     viewPortPosition: {} as RefObject<Position>,
     canvasOffset: {x: 0, y: 0},
@@ -159,15 +160,15 @@ const DraggableCanvas = () => {
             })
         }
 
-        let specialActionState: SpecialAction = {
+        const specialActionState: SpecialAction = {
             for: startNode,
             type: actionType,
         };
+        
         if (actionType == ActionTypes.DeleteEdges) {
             specialActionState.validTargets = collection.getValidDeleteTargets(startNode);
         } else if (actionType == ActionTypes.CreateEdges) {
-            console.log("creating Edge");
-            specialActionState.invalidTargets = collection.getValidDeleteTargets(startNode);
+            specialActionState.invalidTargets = collection.getInvalidConnectTargets(startNode);
         }
         setSpecialAction(specialActionState);
         

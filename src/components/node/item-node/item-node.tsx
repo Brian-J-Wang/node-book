@@ -3,11 +3,12 @@ import "./item-node.css"
 import NodeWrapper from "../node-wrapper";
 import ContextMenuBuilder from "../../contextMenuBuilder/contextMenuBuilder";
 import { CollectionContext } from "../../collection/Collection";
-import NodeObject, { NodeObjectBuilder } from "../node-object";
+import NodeObject, { NodeObjectBuilder, NodeValidationObject } from "../node-object";
 import { Position } from "../../../utils/math/position";
 import FormBuilder from "../../form/form";
 import { OriginNodeObject } from "../origin-node/origin-node";
 import CheckList, { checkListItem } from "../../form/form-components/check-list/check-list";
+import { EdgeProps } from "../../edge/edge";
 
 
 type ColorCode = "none" | "green" | "yellow" | "red" | "blue" | "purple";
@@ -29,6 +30,18 @@ export class ItemNodeObject extends NodeObject {
 
     getType(): string {
         return "item-node"
+    }
+
+    //@ts-ignore
+    //@devcl [ ] feat: add path validation to the item-node
+    validate(nodes: NodeObject[], edges: EdgeProps[]): NodeValidationObject {
+
+        //edges must lead back to the orgin node;
+
+        return {
+            isValid: true,
+            message: ""
+        }
     }
 
     getComponent(): ReactNode {
