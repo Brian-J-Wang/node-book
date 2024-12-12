@@ -23,7 +23,6 @@ const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>((props, r
 
     useImperativeHandle(ref, () => ({
         startDrawing: (start) => {
-            console.log("started Drawing");
             setIsDrawing(true);
             setDrawStart({
                 x: start.x,
@@ -51,6 +50,19 @@ const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>((props, r
         }
     }, []);
 
+    const edges: {start: string, end: string }[] = []
+    collection.nodeManager.nodes.forEach((node) => {
+        const validEdges = node.connections
+        .filter((connection) => connection.connectionType == "downstream")
+        .map((connection) => {
+            return {
+                start: node.id,
+                end: connection.id,
+            }
+        });
+        edges.push( ...validEdges );
+    })
+
     return(
         <svg className="edge-renderer" viewBox={`0 0 5000 5000`}  width={5000} height={5000}>
             <defs>
@@ -70,9 +82,9 @@ const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>((props, r
                     y2={mousePosition.y + (canvasContext.viewPortPosition.current?.y ?? 0)} className="edge-renderer__fake-line" markerEnd="url(#arrow)"/>
             ) : (<></>)}
             {
-                collection.edges.map((edge) => {
+                edges.map((edge) => {
                     return (
-                        <Edge key={`${edge.startingNode}${edge.terminalNode}`} startingNode={edge.startingNode} terminalNode={edge.terminalNode} marker="url(#arrow)"/>
+                        <Edge key={`${edge.start}${edge.end}`} startingNode={edge.start} terminalNode={edge.end} marker="url(#arrow)"/>
                     )
                 })
             }

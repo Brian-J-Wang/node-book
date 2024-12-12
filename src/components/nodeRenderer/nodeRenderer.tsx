@@ -4,12 +4,12 @@ import OriginNode from "../node/origin-node/origin-node";
 import ItemNode, { ItemNodeObject } from "../node/item-node/item-node";
 
 const NodeRenderer = () => {
-    const collectionContext = useContext(CollectionContext);
+    const collection = useContext(CollectionContext);
 
     return (
         <>
             {
-                collectionContext.nodes.map((node) => {
+                collection.nodeManager.nodes.map((node) => {
                     const type = node.getType();
 
                     if (type == "origin-node") {

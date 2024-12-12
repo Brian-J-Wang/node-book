@@ -24,21 +24,13 @@ type SpecialAction = {
 type CanvasContext = {
     viewPortPosition: RefObject<Position>,
     canvasOffset: Position,
-    specialAction?: SpecialAction
     drawConnection: (nodeId: string, type: ActionTypes) => void
-    specialActionComplete: () => void
 }
 // eslint-disable-next-line react-refresh/only-export-components
 export const CanvasContext = createContext<CanvasContext>({
     viewPortPosition: {} as RefObject<Position>,
     canvasOffset: {x: 0, y: 0},
-    specialAction: {
-        for: "",
-        type: ActionTypes.CreateEdges,
-        validTargets: []
-    },
     drawConnection: () => {},
-    specialActionComplete: () => {}
 })
 
 const DraggableCanvas = () => {
@@ -134,7 +126,7 @@ const DraggableCanvas = () => {
                         x: evt.clientX + position.current.x,
                         y: evt.clientY + position.current.y
                     }
-                    collection.addNode(new ItemNodeObject(newPosition));
+                    collection.nodeManager.addNode(new ItemNodeObject(newPosition));
                 }}
                 blurb="Add Node"
             />
@@ -148,11 +140,10 @@ const DraggableCanvas = () => {
         }
     }
     
-    const [specialAction, setSpecialAction] = useState<SpecialAction | undefined>(undefined);
     const edgeRendererController = useRef<edgeRendererHandle>() as RefObject<edgeRendererHandle>;
     const nodeEditorController = useContext(NodeEditorContext);
-    const drawConnection = (startNode: string, actionType: ActionTypes) => {
-        const rect = document.getElementById(startNode)?.getBoundingClientRect();
+    const drawConnection = (src: string, actionType: ActionTypes) => {
+        const rect = document.getElementById(src)?.getBoundingClientRect();
         if (rect) {
             edgeRendererController.current?.startDrawing({
                 x: rect.x + (position.current.x) + (rect.width / 2),
@@ -160,18 +151,38 @@ const DraggableCanvas = () => {
             })
         }
 
-        const specialActionState: SpecialAction = {
-            for: startNode,
+        const srcNode = collection.nodeManager.getNode(src);
+
+        const specialAction: SpecialAction = {
+            for: src,
             type: actionType,
         };
 
-        if (actionType == ActionTypes.DeleteEdges) {
-            specialActionState.validTargets = collection.getValidDeleteTargets(startNode);
-        } else if (actionType == ActionTypes.CreateEdges) {
-            specialActionState.invalidTargets = collection.getInvalidConnectTargets(startNode);
+        if (actionType == ActionTypes.CreateEdges) {
+            collection.nodeManager.nodes.forEach((node) => {
+                node.builder().specialOutline("constructive");
+            })
+
+            srcNode.connections.forEach((connection) => {
+                collection.nodeManager.getNode(connection.id).builder().specialOutline('none');
+            })
+
+            collection.nodeManager.traverseGraph(src, (node) => {
+                node.builder().specialOutline("none");                
+
+                return node.connections
+                    .filter((connection) => connection.connectionType == "upstream")
+                    .map((connection) => collection.nodeManager.getNode(connection.id));
+            });
+            
+            collection.nodeManager.update();
+        } else if (actionType == ActionTypes.DeleteEdges) {
+            srcNode.connections.forEach((connection) => {
+                collection.nodeManager.getNode(connection.id).builder().specialOutline("destructive");
+            })
+
+            collection.nodeManager.update();
         }
-        
-        setSpecialAction(specialActionState);
         
         nodeEditorController.suppressEditor(true);
         document.addEventListener("click", handleMouseClick);
@@ -188,29 +199,20 @@ const DraggableCanvas = () => {
             evt.stopImmediatePropagation();
 
             const evtTarget = evt.target as Element;
-            const terminalNode = evtTarget.closest(".node")?.id ?? null;
-            if (!terminalNode || terminalNode == startNode) {
+            const tgt = evtTarget.closest(".node")?.id ?? null;
+            if (!tgt || tgt == src) {
                 return;
             }
 
-            console.log("handling state");
+            if (specialAction.type == ActionTypes.CreateEdges) {
+                if (srcNode?.connections.some((connection) => connection.id == tgt)) {
+                    return;
+                }
 
-            if (specialActionState.type == ActionTypes.CreateEdges) {
-                if (specialActionState.invalidTargets?.includes(terminalNode)) {
-                    return;
-                } else {
-                    collection.addEdge({
-                        startingNode: startNode,
-                        terminalNode: terminalNode
-                    });
-                }
-            } else if (specialActionState?.type == ActionTypes.DeleteEdges) {
-                console.log('handling delete');
-                if (specialActionState.validTargets?.includes(terminalNode)) {
-                    collection.removeEdge(startNode, terminalNode);
-                } else {
-                    return;
-                }
+                collection.nodeManager.addConnection(src, tgt, "downstream");
+            }
+            else if (specialAction.type == ActionTypes.DeleteEdges) {
+                collection.nodeManager.removeConnection(src, tgt);
             }
 
             clearAction();
@@ -218,24 +220,23 @@ const DraggableCanvas = () => {
         }
 
         function clearAction() {
-            nodeEditorController.suppressEditor(false);
-            setSpecialAction(undefined);
+            collection.nodeManager.nodes.forEach((node) => {
+                node.builder().specialOutline("none");
+            })
+            collection.nodeManager.update();
+
+            
             document.removeEventListener("click", handleMouseClick);
             document.removeEventListener("keydown", handleKeyboardEscape);
+            nodeEditorController.suppressEditor(false);
         }
-    }
-
-    const specialActionComplete = () => {
-        setSpecialAction(undefined);
     }
 
     return (
         <CanvasContext.Provider value={{
                 canvasOffset: {x: dimensions.x / 2, y: dimensions.y / 2}, 
                 viewPortPosition: position,
-                specialAction: specialAction,
-                drawConnection: drawConnection,
-                specialActionComplete: specialActionComplete
+                drawConnection: drawConnection
             }}>
             <div onDragStart={handleDragStart} onDrag={handleDrag} onMouseDown={handleClick} className="draggable-canvas" 
             id="draggable-canvas" draggable>

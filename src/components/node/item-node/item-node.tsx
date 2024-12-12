@@ -1,14 +1,12 @@
-import { ReactNode, useContext, useState } from "react";
+import { ReactNode, useContext } from "react";
 import "./item-node.css"
 import NodeWrapper from "../node-wrapper";
 import ContextMenuBuilder from "../../contextMenuBuilder/contextMenuBuilder";
 import { CollectionContext } from "../../collection/Collection";
-import NodeObject, { NodeObjectBuilder, NodeValidationObject } from "../node-object";
+import NodeObject, { NodeObjectBuilder } from "../node-object";
 import { Position } from "../../../utils/math/position";
 import FormBuilder from "../../form/form";
-import { OriginNodeObject } from "../origin-node/origin-node";
 import CheckList, { checkListItem } from "../../form/form-components/check-list/check-list";
-import { EdgeProps } from "../../edge/edge";
 
 
 type ColorCode = "none" | "green" | "yellow" | "red" | "blue" | "purple";
@@ -34,14 +32,10 @@ export class ItemNodeObject extends NodeObject {
 
     //@ts-ignore
     //@devcl [ ] feat: add path validation to the item-node
-    validate(nodes: NodeObject[], edges: EdgeProps[]): NodeValidationObject {
-
+    validate(): boolean {
         //edges must lead back to the orgin node;
 
-        return {
-            isValid: true,
-            message: ""
-        }
+        return true;
     }
 
     getComponent(): ReactNode {
@@ -51,16 +45,15 @@ export class ItemNodeObject extends NodeObject {
     }
 
     builder() {
-        return new ItemNodeBuilder(this);
+        return new ItemNodeBuilder(this, this.update);
     }
 }
 
 class ItemNodeBuilder extends NodeObjectBuilder {
     node: ItemNodeObject;
-    constructor(source: OriginNodeObject) {
-        super(source);
-        this.node = new ItemNodeObject({x: 0, y: 0});
-        this.node = Object.assign(this.node, source);
+    constructor(source: ItemNodeObject, update: () => void) {
+        super(source, update);
+        this.node = source
     }
 
     checked(value: boolean) {
@@ -86,10 +79,6 @@ class ItemNodeBuilder extends NodeObjectBuilder {
     checkList(value: checkListItem[]) {
         this.node.checkList = value;
         return this;
-    }
-
-    complete() {
-        return this.node;
     }
 }
 
@@ -144,7 +133,7 @@ const ItemNode = ({node} : ItemNodeProps) => {
             <ContextMenuBuilder.CMOption 
                 blurb="Delete Node"
                 onClick={() => {
-                    collection.removeNode(node.id);
+                    collection.nodeManager.removeNode(node.id);
                 }}
             />
         </>
@@ -157,7 +146,7 @@ const ItemNode = ({node} : ItemNodeProps) => {
     return (
         <NodeWrapper 
             node={node} 
-            sidebar={<ItemNodeSideBar inputNode={node} key={node.id}/>} 
+            sidebar={<ItemNodeSideBar node={node} key={node.id}/>} 
             contextMenu={contextMenu}>
             <div className="item-node__container">
                 <div className="item-node__header">
@@ -191,26 +180,17 @@ const ItemNode = ({node} : ItemNodeProps) => {
 
 //@devcl [] refactor: find some way to have the input node updating without having to have duplicate node variable
 //          in the component.
-const ItemNodeSideBar: React.FC<{inputNode: ItemNodeObject}> = ({inputNode}) => {
-    const collection = useContext(CollectionContext);
-    const [node, setNode] = useState<ItemNodeObject>(inputNode);
-
-    //@devcl [] refactor: is there a way to allow types that extend from a class be used as a valid type in typescript?
-    function updateNode(update: ItemNodeObject) {
-        collection.updateNode(update);
-        setNode(update);
-    }
-
+const ItemNodeSideBar: React.FC<{node: ItemNodeObject}> = ({node}) => {
     return (
         <>
             <input type="text" className="item-node-sb__title" defaultValue={node.title} onChange={(evt) => {
-                updateNode(node.builder().title(evt.target.value).complete());
+                node.builder().title(evt.target.value).complete()
             }}/>
             <FormBuilder name={"node form"}>
                 <FormBuilder.Section>
                     <FormBuilder.RadioSelect displayName="Color Code" formName="color-code" 
                     intialChecked={node.colorCode} onChange={(evt: React.ChangeEvent) => {
-                        updateNode(node.builder().colorCode(evt.target.id as ColorCode).complete());
+                        node.builder().colorCode(evt.target.id as ColorCode).complete()
                     }}>
                         {
                             colors.map(color => (
@@ -223,13 +203,13 @@ const ItemNodeSideBar: React.FC<{inputNode: ItemNodeObject}> = ({inputNode}) => 
                     </FormBuilder.RadioSelect>
                     <FormBuilder.TextField placeholder={"description"} initialValue={node.description} 
                         onUpdate={(value: string) => {
-                            updateNode(node.builder().description(value).complete());
+                            node.builder().description(value).complete()
                         }
                     }/>
                 </FormBuilder.Section>
                 <FormBuilder.Section>
-                    <CheckList content={inputNode.checkList} onUpdate={(value: checkListItem[]) => {
-                        updateNode(node.builder().checkList(value).complete());
+                    <CheckList content={node.checkList} onUpdate={(value: checkListItem[]) => {
+                        node.builder().checkList(value).complete()
                     }} checkListName={"Poggers"}/>
                 </FormBuilder.Section>
             </FormBuilder>

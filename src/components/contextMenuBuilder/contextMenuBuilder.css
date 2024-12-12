@@ -9,12 +9,12 @@
 
 .cmb__item {
     height: 24px;
+    display: flex;
+    align-items: center;
 }
 
 .cmb__option {
     padding-left: 4px;
-    display: flex;
-    align-items: center;
 }
 
 .cmb__option__style_no-image {

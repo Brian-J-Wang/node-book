@@ -21,7 +21,7 @@ class TerminalNodeObject extends NodeObject {
     }
 
     getComponent(): ReactNode {
-        <TerminalNode node={this} key={this.id}/>
+        return <TerminalNode node={this} key={this.id}/>
     }
 
     builder(): NodeObjectBuilder {

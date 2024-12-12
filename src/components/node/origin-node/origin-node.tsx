@@ -1,9 +1,8 @@
 import { ReactNode } from "react"
 import "./origin-node.css"
 import NodeWrapper from "../node-wrapper"
-import NodeObject, { NodeObjectBuilder, NodeValidationObject, } from "../node-object"
+import NodeObject, { NodeObjectBuilder } from "../node-object"
 import { Position } from "../../../utils/math/position"
-import { EdgeProps } from "../../edge/edge"
 import ValidationNotification from "../components/validation-notification"
 
 export class OriginNodeObject extends NodeObject {
@@ -15,31 +14,24 @@ export class OriginNodeObject extends NodeObject {
         return "origin-node";
     }
 
-    validate(nodes: NodeObject[], edges: EdgeProps[]): NodeValidationObject {
-        //there cannot be more than two instances of it.
-        for (let i = 0; i < nodes.length; i++) {
-            if (nodes[i].getType() == "origin-node" && nodes[i].id != this.id) {
-                return {
-                    isValid: false,
-                    message: "Multiple copies of origin node is not allowed to exist."
-                };
-            }
-        }
-
-        //edges cannot lead to this node
-        for (let i = 0; i < edges.length; i++) {
-            if (edges[i].terminalNode == this.id) {
-                return {
+    validate(): boolean {
+        for (let i = 0; i < this.connections.length; i++) {
+            const connection = this.connections[i];
+            if (connection.connectionType == "upstream") {
+                this.validationMessage = {
                     isValid: false,
                     message: "Origin node is not allowed to have paths leading to it."
                 };
+
+                return false;
             }
         }
 
-        return {
+        this.validationMessage = {
             isValid: true,
             message: ""
         }
+        return true;
     }
 
     getComponent(): ReactNode {
@@ -49,16 +41,15 @@ export class OriginNodeObject extends NodeObject {
     }
 
     builder(): NodeObjectBuilder {
-        return new OriginNodeBuilder(this);
+        return new OriginNodeBuilder(this, this.update);
     }
 }
 
 class OriginNodeBuilder extends NodeObjectBuilder {
     node: OriginNodeObject;
-    constructor(source: OriginNodeObject) {
-        super(source);
-        this.node = new OriginNodeObject({x: 0, y: 0});
-        this.node = Object.assign(this.node, source);
+    constructor(source: OriginNodeObject, update: () => void) {
+        super(source, update);
+        this.node = source;
     }
 }
 
