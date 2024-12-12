@@ -1,5 +1,4 @@
 import { ReactNode, useContext } from "react";
-import "./item-node.css"
 import NodeWrapper from "../node-wrapper";
 import ContextMenuBuilder from "../../contextMenuBuilder/contextMenuBuilder";
 import { CollectionContext } from "../../collection/Collection";
@@ -8,6 +7,8 @@ import { Position } from "../../../utils/math/position";
 import FormBuilder from "../../form/form";
 import CheckList, { checkListItem } from "../../form/form-components/check-list/check-list";
 
+import "./item-node.css"
+import "../../../assets/styles.css"
 
 type ColorCode = "none" | "green" | "yellow" | "red" | "blue" | "purple";
 export class ItemNodeObject extends NodeObject {
@@ -148,7 +149,7 @@ const ItemNode = ({node} : ItemNodeProps) => {
             node={node} 
             sidebar={<ItemNodeSideBar node={node} key={node.id}/>} 
             contextMenu={contextMenu}>
-            <div className="item-node__container">
+            <div className="item-node__container style__border">
                 <div className="item-node__header">
                     <div className="item-node__header-left">
                         <input type="checkbox" className="item-node__check-box" onClick={(evt) => {evt.stopPropagation()}}/>

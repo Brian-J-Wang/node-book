@@ -1,9 +1,11 @@
 import { ReactNode } from "react"
-import "./origin-node.css"
 import NodeWrapper from "../node-wrapper"
 import NodeObject, { NodeObjectBuilder } from "../node-object"
 import { Position } from "../../../utils/math/position"
 import ValidationNotification from "../components/validation-notification"
+
+import "./origin-node.css"
+import "../../../assets/styles.css"
 
 export class OriginNodeObject extends NodeObject {
     constructor(position: Position, id?: string) {
@@ -89,7 +91,7 @@ const OriginNode = ({node}: OriginNodeProps) => {
             node={node} 
             sidebar={sideBar} 
             contextMenu={<></>}>
-            <div className={"origin-node " + validationClass}>           
+            <div className={"origin-node style__border " + validationClass}>           
                 Start Here
             </div>
         </NodeWrapper>
