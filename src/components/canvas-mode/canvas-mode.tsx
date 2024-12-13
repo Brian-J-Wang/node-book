@@ -1,11 +1,10 @@
 import { createContext, ReactNode, useState } from "react"
 
-type canvasModes = "edit" | "draw"
-type canvasModeContextProps = {
-    mode: canvasModes
+type canvasModes = "edit" | "draw";
+export const CanvasModeContext = createContext<{
+    mode: canvasModes,
     setMode: (mode: canvasModes) => void
-}
-const CanvasModeContext = createContext<canvasModeContextProps>({
+}>({
     mode: "edit",
     setMode: () => {}
 })
@@ -13,11 +12,16 @@ const CanvasModeContext = createContext<canvasModeContextProps>({
 type CanvasModeProps = {
     children: ReactNode
 }
+
 const CanvasMode = (props: CanvasModeProps ) => {
     const [mode, setMode] = useState<canvasModes>("edit");
+
+
     return (
-        <CanvasModeContext.Provider value={{mode, setMode}}>
+        <CanvasModeContext.Provider value={{mode: mode, setMode: setMode}}>
             {props.children}
         </CanvasModeContext.Provider>
     )
 }
+
+export default CanvasMode;

@@ -6,11 +6,11 @@ import { contextMenuContext } from "../contextMenu/ContextMenu"
 import ContextMenuBuilder from "../contextMenuBuilder/contextMenuBuilder"
 import createConnection from "../../assets/create-connection.svg"
 import crossMark from "../../assets/cross.svg"
-import { CollectionContext } from "../collection/Collection"
 import BoundingBox, { OutofBoundsHandle } from "../../properties/detectOutofBounds/boundingBox"
 import { SideBarContext } from "../side-bar/sidebar"
 import { ActionTypes, CanvasContext } from "../../properties/canvas/canvas"
 import NodeObject, { SpecialOutline } from "./node-object"
+import { CanvasModeContext } from "../canvas-mode/canvas-mode"
 
 export interface SharedNodeFunctions {
     onLeftMouse: () => void,
@@ -30,6 +30,7 @@ const NodeWrapper : React.FC<NodeProps> = ({node, sidebar, contextMenu, children
     const outlineClassesStateManager = useRef<NodeOutlineManager>(new NodeOutlineManager(setOutlineClasses))
     const boundController = useRef<OutofBoundsHandle>() as RefObject<OutofBoundsHandle>;
     const canvasContext = useContext(CanvasContext);
+    const canvasMode = useContext(CanvasModeContext);
 
     function handleDrawConnection(evt: React.MouseEvent) {
         evt.stopPropagation();
@@ -74,9 +75,11 @@ const NodeWrapper : React.FC<NodeProps> = ({node, sidebar, contextMenu, children
 
     const sidebarContext = useContext(SideBarContext);
     function focusNode() {
-        node.builder().specialOutline('selected').complete();
-        boundController.current?.setListen(true);
-        sidebarContext.openSideBar(sidebar);
+        if (canvasMode.mode == "edit") {
+            node.builder().specialOutline('selected').complete();
+            boundController.current?.setListen(true);
+            sidebarContext.openSideBar(sidebar);
+        }
     }
 
     function unfocusNode() {
@@ -91,7 +94,11 @@ const NodeWrapper : React.FC<NodeProps> = ({node, sidebar, contextMenu, children
         };
 
         node.builder().position(newPosition).complete();
-    }    
+    }
+
+    useEffect(() => {
+        console.log("mode changed");
+    }, [canvasMode.mode])
 
     return (
         
