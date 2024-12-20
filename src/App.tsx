@@ -5,6 +5,7 @@ import Collection from './components/collection/Collection'
 import SideBar from './components/side-bar/sidebar'
 import DraggableCanvas from './properties/canvas/canvas'
 import MetaBanner from './components/metaBanner/meta-banner'
+import CanvasMode from './components/canvas-mode/canvas-mode'
 
 function App() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -22,6 +23,7 @@ function App() {
   return (
     <div className='app'>
       <div>
+        <CanvasMode>
         <Collection>
           <MetaBanner/>
           <ContextMenu>
@@ -30,6 +32,7 @@ function App() {
           </SideBar>
           </ContextMenu>
         </Collection>
+        </CanvasMode>
       </div>
     </div>
     

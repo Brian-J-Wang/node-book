@@ -8,6 +8,7 @@ import EdgeRenderer, { edgeRendererHandle } from "../../components/edgeRenderer/
 import { NodeEditorContext } from "../../components/nodeEditor/nodeEditor";
 import NodeRenderer from "../../components/nodeRenderer/nodeRenderer";
 import { ItemNodeObject } from "../../components/node/item-node/item-node";
+import { CanvasModeContext } from "../../components/canvas-mode/canvas-mode";
 
 export enum ActionTypes {
     CreateEdges = "CreateEdges",
@@ -21,13 +22,13 @@ type SpecialAction = {
     invalidTargets?: string[]
 }
 
-type CanvasContext = {
+type canvasContext = {
     viewPortPosition: RefObject<Position>,
     canvasOffset: Position,
     drawConnection: (nodeId: string, type: ActionTypes) => void
 }
 // eslint-disable-next-line react-refresh/only-export-components
-export const CanvasContext = createContext<CanvasContext>({
+export const CanvasContext = createContext<canvasContext>({
     viewPortPosition: {} as RefObject<Position>,
     canvasOffset: {x: 0, y: 0},
     drawConnection: () => {},
@@ -142,6 +143,7 @@ const DraggableCanvas = () => {
     
     const edgeRendererController = useRef<edgeRendererHandle>() as RefObject<edgeRendererHandle>;
     const nodeEditorController = useContext(NodeEditorContext);
+    const canvasMode = useContext(CanvasModeContext);
     const drawConnection = (src: string, actionType: ActionTypes) => {
         const rect = document.getElementById(src)?.getBoundingClientRect();
         if (rect) {
@@ -196,6 +198,7 @@ const DraggableCanvas = () => {
         }
 
         function handleMouseClick(evt : MouseEvent) {
+            canvasMode.setMode("draw");
             evt.stopImmediatePropagation();
 
             const evtTarget = evt.target as Element;
@@ -220,6 +223,7 @@ const DraggableCanvas = () => {
         }
 
         function clearAction() {
+            canvasMode.setMode("edit");
             collection.nodeManager.nodes.forEach((node) => {
                 node.builder().specialOutline("none");
             })
