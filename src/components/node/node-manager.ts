@@ -72,6 +72,10 @@ class NodeManager {
         const srcNode2 = this.getNode(src2);
         srcNode1.connections = srcNode1.connections.filter((connection) => connection.id != src2);
         srcNode2.connections = srcNode2.connections.filter((connection) => connection.id != src1);
+
+        srcNode1.validate();
+        srcNode2.validate();
+
         this.update();
     }
 

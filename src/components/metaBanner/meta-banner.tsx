@@ -8,16 +8,8 @@ const MetaBanner = () => {
     return ( 
         <div className={"meta-banner style__border " + (!isExpanded && "meta-banner__collapsed" )} hidden>
             <button className="meta-banner__dots" onClick={() => {setIsExpanded(!isExpanded)}}>
-                <img src={dots} alt="" />
+                <img src={dots} alt="" className="meta-banner__image"/>
             </button>
-            {
-                isExpanded && (
-                    <h2 className="meta-banner__title">
-                        Collection Name
-                    </h2>
-                )
-            }
-            
         </div>
     )
 }
