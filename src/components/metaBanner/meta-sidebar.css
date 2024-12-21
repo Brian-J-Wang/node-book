@@ -1,9 +1,0 @@
-.meta-sidebar {
-    box-sizing: border-box;
-    width: 0px;
-    height: 100%;
-}
-
-.meta-sidebar__active {
-    width: 320px;
-}

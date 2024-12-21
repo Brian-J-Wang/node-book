@@ -4,23 +4,29 @@
 }
 
 h1 { 
-  font-size: 32.9307px; 
+  font-size: 32.9307px;
+  color: #292929;
 }
 h2 { 
   font-size: 25.8885px; 
+  color: #292929;
 }
 h3 { 
   font-size: 20.3523px; 
+  color: #292929;
 }
 p { 
   font-size: 16px; 
+  color: #292929;
 }
 small { 
   font-size: 12.5784px; 
+  color: #292929;
 }
 
 input { 
   font-size: 12.5784px; 
+  color: #292929;
   font-weight: 400;
 }
 

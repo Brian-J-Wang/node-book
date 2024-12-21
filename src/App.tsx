@@ -4,7 +4,7 @@ import ContextMenu from './components/contextMenu/ContextMenu'
 import Collection from './components/collection/Collection'
 import SideBar from './components/side-bar/sidebar'
 import DraggableCanvas from './properties/canvas/canvas'
-import MetaBanner from './components/metaBanner/meta-banner'
+import MainMenu from './components/mainMenu/main-menu'
 import CanvasMode from './components/canvas-mode/canvas-mode'
 
 function App() {
@@ -25,7 +25,7 @@ function App() {
       <div>
         <CanvasMode>
         <Collection>
-          <MetaBanner/>
+          <MainMenu/>
           <ContextMenu>
           <SideBar>
           <DraggableCanvas/>
