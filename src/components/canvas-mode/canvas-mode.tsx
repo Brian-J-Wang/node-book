@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useState } from "react"
+import { createContext, ReactNode, useRef, useState } from "react"
 
 type canvasModes = "edit" | "draw";
 export const CanvasModeContext = createContext<{
@@ -14,11 +14,15 @@ type CanvasModeProps = {
 }
 
 const CanvasMode = (props: CanvasModeProps ) => {
-    const [mode, setMode] = useState<canvasModes>("edit");
+    const currentMode = useRef<canvasModes>("edit");
 
+    function updateMode(mode: canvasModes) {
+        console.log(mode);
+        currentMode.current = mode;
+    }
 
     return (
-        <CanvasModeContext.Provider value={{mode: mode, setMode: setMode}}>
+        <CanvasModeContext.Provider value={{mode: currentMode.current, setMode: updateMode}}>
             {props.children}
         </CanvasModeContext.Provider>
     )

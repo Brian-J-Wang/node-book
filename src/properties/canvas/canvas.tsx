@@ -145,6 +145,7 @@ const DraggableCanvas = () => {
     const nodeEditorController = useContext(NodeEditorContext);
     const canvasMode = useContext(CanvasModeContext);
     const drawConnection = (src: string, actionType: ActionTypes) => {
+        canvasMode.setMode("draw");
         const rect = document.getElementById(src)?.getBoundingClientRect();
         if (rect) {
             edgeRendererController.current?.startDrawing({
@@ -187,7 +188,7 @@ const DraggableCanvas = () => {
         }
         
         nodeEditorController.suppressEditor(true);
-        document.addEventListener("click", handleMouseClick);
+        document.addEventListener("click", handleMouseClick, { capture: true });
         document.addEventListener("keydown", handleKeyboardEscape);
 
         function handleKeyboardEscape(evt: KeyboardEvent) {
@@ -198,7 +199,6 @@ const DraggableCanvas = () => {
         }
 
         function handleMouseClick(evt : MouseEvent) {
-            canvasMode.setMode("draw");
             evt.stopImmediatePropagation();
 
             const evtTarget = evt.target as Element;
@@ -218,21 +218,21 @@ const DraggableCanvas = () => {
                 collection.nodeManager.removeConnection(src, tgt);
             }
 
-            clearAction();
             edgeRendererController.current?.stopDrawing();   
+            clearAction();
         }
 
         function clearAction() {
-            canvasMode.setMode("edit");
             collection.nodeManager.nodes.forEach((node) => {
                 node.builder().specialOutline("none");
             })
             collection.nodeManager.update();
 
             
-            document.removeEventListener("click", handleMouseClick);
+            document.removeEventListener("click", handleMouseClick, { capture: true });
             document.removeEventListener("keydown", handleKeyboardEscape);
             nodeEditorController.suppressEditor(false);
+            canvasMode.setMode("edit");
         }
     }
 

@@ -13,7 +13,7 @@ import cheveronRight from "../../assets/bootstrap-icons/cheveron-right.svg";
 import cheveronLeft from "../../assets/bootstrap-icons/cheveron-left.svg";
 
 const MainMenu = () => {
-    const [isExpanded, setIsExpanded] = useState<boolean>(true);
+    const [isExpanded, setIsExpanded] = useState<boolean>(false);
     const boundingBox = useRef<OutofBoundsHandle>() as RefObject<OutofBoundsHandle>;
 
     useEffect(() => {
@@ -57,8 +57,8 @@ const MainMenu = () => {
             <button className="meta-banner__tab" onClick={() => {setIsExpanded(!isExpanded)}}>
                 {
                     isExpanded
-                    ? <img src={cheveronLeft} alt="" className="meta-banner__image"/>
-                    : <img src={cheveronRight} alt="" className="meta-banner__image"/>
+                    ? <img src={cheveronLeft} alt="" className="meta-banner__image" draggable="false"/>
+                    : <img src={cheveronRight} alt="" className="meta-banner__image" draggable="false"/>
                 }
             </button>
         </div>
