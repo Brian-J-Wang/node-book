@@ -1,5 +1,6 @@
 import React from "react";
 import NodeObject, { ConnectionType } from "./node-object";
+import validateNode from "./validation/node-validation";
 
 class NodeManager {
     dispatch: React.Dispatch<React.SetStateAction<NodeObject[]>>;
@@ -56,38 +57,38 @@ class NodeManager {
             id: tgt,
             connectionType: type
         });
-        srcNode.validate();
 
         tgtNode.connections.push({
             id: src,
             connectionType: type == "upstream" ? "downstream" : "upstream"
         });
-        tgtNode.validate();
 
-        this.update();
+        this.validate(srcNode);
+        this.validate(tgtNode);
     }
 
     removeConnection(src1: string, src2: string) {
         const srcNode1 = this.getNode(src1);
         const srcNode2 = this.getNode(src2);
+
         srcNode1.connections = srcNode1.connections.filter((connection) => connection.id != src2);
         srcNode2.connections = srcNode2.connections.filter((connection) => connection.id != src1);
 
-        srcNode1.validate();
-        srcNode2.validate();
-
-        this.update();
+        this.validate(srcNode1);
+        this.validate(srcNode2);
     }
 
-    //nodes that are invalid will have their connections checked.
     validate(node: NodeObject) {
-        const nodes = [ node ];
+        const validator = node.validator();
+        const message = validator(node, this.nodes);
+
+        node.builder().validationObject(message).complete();
     }
 
     //move through the graph and do an operation on the nodes starting from the source node, 
     //return a list of nodes that the function should move to. operation is BFS.
     //function will assume that nodes have been updated. It will not consider nodes that have already been visted;
-    traverseGraph(src: string, predicate: (node: NodeObject) => NodeObject[]) {
+    traverseGraph(src: string, fn: (node: NodeObject) => NodeObject[]) {
         const nodes = [ this.getNode(src) ];
         const visited: NodeObject[] = [];
         while (nodes.length != 0) {
@@ -96,7 +97,7 @@ class NodeManager {
                 return;
             }
 
-            nodes.push( ...predicate(currentNode).filter((node) => !visited.includes(node)));
+            nodes.push( ...fn(currentNode).filter((node) => !visited.includes(node)));
             visited.push(currentNode);
         }
     }

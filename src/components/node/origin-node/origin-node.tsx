@@ -6,6 +6,7 @@ import ValidationNotification from "../components/validation-notification"
 
 import "./origin-node.css"
 import "../../../assets/styles.css"
+import validateOrginNode from "../validation/origin-node-validator"
 
 export class OriginNodeObject extends NodeObject {
     constructor(position: Position, id?: string) {
@@ -16,24 +17,8 @@ export class OriginNodeObject extends NodeObject {
         return "origin-node";
     }
 
-    validate(): boolean {
-        for (let i = 0; i < this.connections.length; i++) {
-            const connection = this.connections[i];
-            if (connection.connectionType == "upstream") {
-                this.validationMessage = {
-                    isValid: false,
-                    message: "Origin node is not allowed to have paths leading to it."
-                };
-
-                return false;
-            }
-        }
-
-        this.validationMessage = {
-            isValid: true,
-            message: ""
-        }
-        return true;
+    validator() {
+        return validateOrginNode;
     }
 
     getComponent(): ReactNode {

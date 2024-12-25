@@ -1,11 +1,7 @@
 import { ReactNode } from "react";
 import { Position } from "../../utils/math/position";
 import { generateObjectId } from "../../utils/uuidGen";
-
-export type NodeValidationObject = {
-    isValid: boolean,
-    message: string
-}
+import { nodeValidation } from "./validation/node-validation";
 
 export type ConnectionType = "upstream" | "downstream"
 type Connection = {
@@ -17,7 +13,7 @@ export type SpecialOutline = "none" | "constructive" | "destructive" | "selected
 export default class NodeObject {
     id: string;
     position: Position;
-    validationMessage: NodeValidationObject;
+    validationMessage: nodeValidation;
     connections: Connection[];
     specialOutline: SpecialOutline;
     update: () => void;
@@ -43,9 +39,8 @@ export default class NodeObject {
         return (<></>)
     }
 
-    validate(): boolean {
-        console.error("validate not set-up for abstract method");
-        return true;
+    validator(): (node: NodeObject, graph: NodeObject[]) => nodeValidation {
+        throw new Error("abstract method validator called");
     }
 
     builder() {
@@ -67,7 +62,7 @@ export class NodeObjectBuilder {
         return this;
     }
 
-    validationObject(validationObject: NodeValidationObject) {
+    validationObject(validationObject: nodeValidation) {
         this.node.validationMessage = validationObject;
         return this;
     }
@@ -91,7 +86,6 @@ export class NodeObjectBuilder {
     }
 
     complete() {
-        this.node.validate();
         this.update();
     }
 }

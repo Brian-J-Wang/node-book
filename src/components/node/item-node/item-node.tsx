@@ -9,6 +9,8 @@ import CheckList, { checkListItem } from "../../form/form-components/check-list/
 
 import "./item-node.css"
 import "../../../assets/styles.css"
+import { nodeValidation } from "../validation/node-validation";
+import validateItemNode from "../validation/item-node-validator";
 
 type ColorCode = "none" | "green" | "yellow" | "red" | "blue" | "purple";
 export class ItemNodeObject extends NodeObject {
@@ -31,12 +33,8 @@ export class ItemNodeObject extends NodeObject {
         return "item-node"
     }
 
-    //@ts-ignore
-    //@devcl [ ] feat: add path validation to the item-node
-    validate(): boolean {
-        //edges must lead back to the orgin node;
-
-        return true;
+    validator(): (node: NodeObject, graph: NodeObject[]) => nodeValidation {
+        return validateItemNode;
     }
 
     getComponent(): ReactNode {

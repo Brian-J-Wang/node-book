@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Position } from "../../../utils/math/position"
 import { EdgeProps } from "../../edge/edge";
-import NodeObject, { NodeObjectBuilder, NodeValidationObject } from "../node-object"
+import NodeObject, { NodeObjectBuilder, nodeValidation } from "../node-object"
 import NodeWrapper from "../node-wrapper"
 
 class TerminalNodeObject extends NodeObject {
@@ -13,7 +13,7 @@ class TerminalNodeObject extends NodeObject {
         return "terminal-node"
     }
 
-    validate(nodes: NodeObject[], edges: EdgeProps[]): NodeValidationObject {
+    validate(nodes: NodeObject[], edges: EdgeProps[]): nodeValidation {
         return {
             isValid: true,
             message: ""
