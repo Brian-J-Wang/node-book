@@ -2,22 +2,29 @@ import { generateObjectId } from "./uuidGen";
 
 //need to implement connection type
 type connection = {
-    node: string,
+    node: node,
     type: connectionType,
 }
 type connectionType = "upstream" | "downstream" | "both"
 
-class Graph<props> {
-    nodes = new Map<string, props>();
-    connections = new Map<string, connection[]>();
-    constructor() {
+type node = {
+    id: string,
+    connections: Map<string, connection>,
+    [key: string]: any,
+}
 
-    }
+class Graph<props> {
+    nodes = new Map<string, props & node>();
+    constructor() {}
 
     addNode(node: props): string {
         const id = generateObjectId();
-        this.nodes.set(id, node);
-        this.connections.set(id, []);
+        const combined = {
+            ...node,
+            connections: new Map(),
+            id: id
+        }
+        this.nodes.set(id, combined);
 
         return id;
     }
@@ -30,12 +37,10 @@ class Graph<props> {
         } else {
             console.error("trying to get a node that does not exist");
         }
-        
     }
 
     removeNode(id: string) {
         this.nodes.delete(id);
-        this.connections.delete(id);
     }
 
     addConnection(node1Id: string, node2Id: string) {
@@ -43,32 +48,35 @@ class Graph<props> {
         const node2 = this.getNode(node2Id);
         
         if (node1 && node2) {
-            node1.connections.push(node2);
-            node2.connections.push(node1);
+            node1.connections.set(node2Id, {
+                node: node2,
+                type: "downstream"
+            });
+
+            node2.connections.set(node1Id, {
+                node: node1,
+                type: "upstream"
+            })
         }
     }
 
     removeConnection(node1Id: string, node2Id: string) {
         const node1 = this.getNode(node1Id);
         if (node1) {
-            node1.connections = node1.connections.filter((connection) => {
-                if (connection.id == node2Id) {
-                    return false;
-                } else {
-                    return true;
-                }
-            })
+            deleteConnection(node1, node2Id);
         }
 
         const node2 = this.getNode(node2Id);
         if (node2) {
-            node2.connections = node2.connections.filter((connection) => {
-                if (connection.id == node1Id) {
-                    return false;
-                } else {
-                    return true;
-                }
-            })
+            deleteConnection(node2, node1Id);
+        }
+
+        function deleteConnection(node: node & props, id: string) {
+            const exists = node.connections.delete(id);
+
+            if (!exists) {
+                console.error("connection does not exist!");
+            }
         }
     }
 
@@ -76,40 +84,45 @@ class Graph<props> {
         const node = this.getNode(id);
 
         if (node) {
-            const connections = node.connections.filter((connection) => {
-                if (type = 'both') {
-                    return true;
+            const neighbors: connection[] = [];
+
+            node.connections.forEach((connection) => {
+                if (type == "both") {
+                    neighbors.push(connection);
+                    return;
                 }
-            }).map((connection) => {
-                return connection.id;
+
+                if (connection.type == type) {
+                    neighbors.push(connection);
+                }
             })
 
-            return connections;
+            return neighbors;
         } else {
             return [];
         }
     }
 
-    traverse(src: string, fn: (node: node & props) => boolean, direction: connectionType) {
-        const queue = [ src ];
+    // traverse(src: string, fn: (node: node & props) => boolean, direction: connectionType) {
+    //     const queue = [ src ];
 
-        while (queue.length != 0) {
-            const id = queue.shift();
-            if (!id) {
-                break;
-            }
+    //     while (queue.length != 0) {
+    //         const id = queue.shift();
+    //         if (!id) {
+    //             break;
+    //         }
 
-            const node = this.getNode(id);   
-            if (!node) {
-                break;
-            }
+    //         const node = this.getNode(id);   
+    //         if (!node) {
+    //             break;
+    //         }
 
-            if (fn(node)) {
-                const connections = this.getConnections(id);
-                queue.push( ...connections );
-            }
-        }
-    }
+    //         if (fn(node)) {
+    //             const connections = this.getConnections(id);
+    //             queue.push( ...connections );
+    //         }
+    //     }
+    // }
 
     snapshot() {
         return [ ...this.nodes ];
