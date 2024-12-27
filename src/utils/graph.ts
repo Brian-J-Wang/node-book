@@ -1,50 +1,41 @@
 import { generateObjectId } from "./uuidGen";
 
 //need to implement connection type
-
+type connection = {
+    node: string,
+    type: connectionType,
+}
 type connectionType = "upstream" | "downstream" | "both"
 
-type node = {
-    id: string,
-    connections: node[];
-}
-
 class Graph<props> {
-    nodes: (node & props)[] = [];
+    nodes = new Map<string, props>();
+    connections = new Map<string, connection[]>();
     constructor() {
 
     }
 
     addNode(node: props): string {
-        const combined = {
-            ...node,
-            id: generateObjectId(),
-            connections: []
-        };
-        
-        this.nodes.push(combined);
+        const id = generateObjectId();
+        this.nodes.set(id, node);
+        this.connections.set(id, []);
 
-        return combined.id;
+        return id;
     }
 
     getNode(id: string) {
-        const node = this.nodes.find((node) => node.id == id); 
-        if (!node) {
-            console.error("node was not found");
-            return null;
-        }
+        const node = this.nodes.get(id);
 
-        return node;
+        if (node) {
+            return node;
+        } else {
+            console.error("trying to get a node that does not exist");
+        }
+        
     }
 
     removeNode(id: string) {
-        this.nodes = this.nodes.filter((node) => {
-            if (node.id == id) {
-                return false;
-            } else {
-                return true;
-            }
-        })
+        this.nodes.delete(id);
+        this.connections.delete(id);
     }
 
     addConnection(node1Id: string, node2Id: string) {
@@ -124,3 +115,5 @@ class Graph<props> {
         return [ ...this.nodes ];
     }
 }
+
+export default Graph;

@@ -18,9 +18,8 @@ function validateItemNode(node: NodeObject, graph: NodeObject[]): nodeValidation
         })
     }
     
-
-
     return validNode;
+
 }
 
 export default validateItemNode;
