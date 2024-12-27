@@ -50,8 +50,9 @@ const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>((props, r
         }
     }, []);
 
-    const edges: {start: string, end: string }[] = []
+    const edges: {start: string, end: string }[] = [];
     collection.nodeManager.nodes.forEach((node) => {
+        console.log(node);
         const validEdges = node.connections
         .filter((connection) => connection.connectionType == "downstream")
         .map((connection) => {
@@ -61,7 +62,7 @@ const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>((props, r
             }
         });
         edges.push( ...validEdges );
-    })
+    });
 
     return(
         <svg className="edge-renderer" viewBox={`0 0 5000 5000`}  width={5000} height={5000}>

@@ -7,7 +7,7 @@ function validateOrginNode(tgt: NodeObject, _graph: NodeObject[]): nodeValidatio
         if (connection.connectionType == "upstream") {
             return {
                 isValid: false,
-                message: ""
+                message: "Origin  Node not cannot have paths leading to it."
             }
         }
     }

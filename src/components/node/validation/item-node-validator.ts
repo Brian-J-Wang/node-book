@@ -10,7 +10,7 @@ function validateItemNode(node: NodeObject, graph: NodeObject[]): nodeValidation
         const current = queue.shift();
 
         const neighbors = current?.connections.filter((connection) => {
-            if (connection.connectionType = "upstream") {
+            if (connection.connectionType == "upstream") {
                 return true;
             } else {
                 return false;

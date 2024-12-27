@@ -1,6 +1,5 @@
 import React from "react";
 import NodeObject, { ConnectionType } from "./node-object";
-import validateNode from "./validation/node-validation";
 
 class NodeManager {
     dispatch: React.Dispatch<React.SetStateAction<NodeObject[]>>;
@@ -111,6 +110,7 @@ class NodeManager {
     }
 
     update() {
+        console.log("updating graph");
         this.dispatch([ ...this.nodes ]);
     }
 }
