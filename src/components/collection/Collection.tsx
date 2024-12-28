@@ -5,6 +5,7 @@ import NodeManager from "../node/node-manager"
 
 
 type collectionContextType = {
+    nodes: NodeObject[];
     nodeManager: NodeManager
 }
 
@@ -21,7 +22,7 @@ const Collection = ({children}: collectionProps) => {
     const nodeManager = useRef<NodeManager>(new NodeManager(setNodes, nodes));
 
     return (
-        <CollectionContext.Provider value={{nodeManager: nodeManager.current}}>
+        <CollectionContext.Provider value={{nodes: nodes, nodeManager: nodeManager.current}}>
             {children}
         </CollectionContext.Provider>
     )

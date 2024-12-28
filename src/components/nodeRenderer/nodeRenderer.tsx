@@ -11,7 +11,7 @@ const NodeRenderer = () => {
         <>
             {
                 collection.nodeManager.nodes.map((node) => 
-                    nodeComponentFactory(node)
+                    node.getComponent()
                 )
             }
         </>

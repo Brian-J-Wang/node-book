@@ -1,4 +1,4 @@
-import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from "react"
+import { forwardRef, startTransition, useContext, useEffect, useImperativeHandle, useState } from "react"
 import Edge from "../edge/edge"
 import { Position } from "../../utils/math/position"
 
@@ -13,6 +13,11 @@ export type edgeRendererHandle = {
 
 type edgeRendererProps = {
     edgeStyle?: string
+}
+
+type edgeSVG = {
+    start: string,
+    end: string
 }
 
 const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>((props, ref) => {
@@ -50,19 +55,23 @@ const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>((props, r
         }
     }, []);
 
-    const edges: {start: string, end: string }[] = [];
-    collection.nodeManager.nodes.forEach((node) => {
-        console.log(node);
-        const validEdges = node.connections
-        .filter((connection) => connection.connectionType == "downstream")
-        .map((connection) => {
-            return {
-                start: node.id,
-                end: connection.id,
-            }
-        });
-        edges.push( ...validEdges );
-    });
+    const [edges, setEdges] = useState<edgeSVG[]>([]);
+    useEffect(() => {
+        console.log("updated");
+        const validEdges: edgeSVG[] = [];
+        collection.nodeManager.nodes.forEach((node) => {
+            const connections = node.connections.filter((connection) => connection.connectionType == "downstream")
+            .map((connection) => {
+                return {
+                    start: node.id,
+                    end: connection.id
+                }
+            })
+            validEdges.push( ...connections );
+        })
+
+        setEdges(validEdges);
+    }, [collection.nodes])
 
     return(
         <svg className="edge-renderer" viewBox={`0 0 5000 5000`}  width={5000} height={5000}>
