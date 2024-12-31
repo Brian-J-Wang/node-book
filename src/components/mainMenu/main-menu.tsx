@@ -1,5 +1,4 @@
 import "./main-menu.css"
-import dots from "../../assets/dots.svg"
 import { RefObject, useEffect, useRef, useState } from "react"
 import BoundingBox, { OutofBoundsHandle } from "../../properties/detectOutofBounds/boundingBox";
 
@@ -32,9 +31,7 @@ const MainMenu = () => {
                     <button className="menu__home-button">
                         <img src={home} alt="home" className="menu__home-icon" />
                     </button>
-                    <h1 className="menu__title">
-                        Collection Name
-                    </h1>
+                    <input className="menu__title" type="text" defaultValue="Collection Name"/>
                 </div>
                 <div className="menu__footer">
                     <div className="menu__socials">

@@ -31,7 +31,7 @@
 
 .menu__home-button {
     height: 42px;
-    width: 42px;
+    min-width: 42px;
     border: none;
     border-right: 1px solid rgba(29, 29, 29, 0.5);
     cursor: pointer;
@@ -48,11 +48,21 @@
 }
 
 .menu__title {
+    height: 100%;
     margin: 0px;
     font-size: 1.4em;
     line-height: 1.4em;
     align-self: center;
-    margin-left: 8px;
+    margin-left: 0px;
+    padding: 0px 0px 0px 8px;
+    border: none;
+    min-width: 50px;
+    font-weight: 600;
+    outline: none;
+}
+
+.menu__title:hover {
+    background-color: whitesmoke;
 }
 
 .menu__footer {
