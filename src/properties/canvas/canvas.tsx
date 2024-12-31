@@ -40,7 +40,7 @@ const DraggableCanvas = () => {
     const mouseAnchorPosition = useRef<Position>({x: 0, y: 0});
     const viewPortDimensions = useRef<Position>({x: 0, y: 0});
     const collection = useContext(CollectionContext);
-    const dimensions = {x: 5000, y: 5000}
+    const dimensions = {x: 5000, y: 5000};
 
     useEffect(() => {
         const element = document.querySelector(".draggable-canvas");
@@ -115,7 +115,6 @@ const DraggableCanvas = () => {
             y: y
         }
     }
-
     
     //context menus stuff
     const contextMenu = useContext(contextMenuContext);
@@ -127,7 +126,10 @@ const DraggableCanvas = () => {
                         x: evt.clientX + position.current.x,
                         y: evt.clientY + position.current.y
                     }
-                    collection.nodeManager.addNode(new ItemNodeObject(newPosition));
+
+                    if (collection.nodeManager) {
+                        collection.nodeManager.addNode(new ItemNodeObject(newPosition));
+                    }
                 }}
                 blurb="Add Node"
             />
@@ -145,7 +147,10 @@ const DraggableCanvas = () => {
     const nodeEditorController = useContext(NodeEditorContext);
     const canvasMode = useContext(CanvasModeContext);
     const drawConnection = (src: string, actionType: ActionTypes) => {
-        canvasMode.setMode("draw");
+        if (!collection.nodeManager) {
+            return;
+        }
+        
         const rect = document.getElementById(src)?.getBoundingClientRect();
         if (rect) {
             edgeRendererController.current?.startDrawing({
@@ -155,6 +160,7 @@ const DraggableCanvas = () => {
         }
 
         const srcNode = collection.nodeManager.getNode(src);
+        canvasMode.setMode("draw");
 
         const specialAction: SpecialAction = {
             for: src,
@@ -162,29 +168,11 @@ const DraggableCanvas = () => {
         };
 
         if (actionType == ActionTypes.CreateEdges) {
-            collection.nodeManager.nodes.forEach((node) => {
-                node.builder().specialOutline("constructive");
-            })
-
-            srcNode.connections.forEach((connection) => {
-                collection.nodeManager.getNode(connection.id).builder().specialOutline('none');
-            })
-
-            collection.nodeManager.traverseGraph(src, (node) => {
-                node.builder().specialOutline("none");                
-
-                return node.connections
-                    .filter((connection) => connection.connectionType == "upstream")
-                    .map((connection) => collection.nodeManager.getNode(connection.id));
-            });
-            
-            collection.nodeManager.update();
+            collection.nodeManager.setOutline(src, 'constructive');
+            //rewrite logic for actionTypes
         } else if (actionType == ActionTypes.DeleteEdges) {
-            srcNode.connections.forEach((connection) => {
-                collection.nodeManager.getNode(connection.id).builder().specialOutline("destructive");
-            })
-
-            collection.nodeManager.update();
+            collection.nodeManager.setOutline(src, 'destructive');
+            //rewrite logic for actionTypes
         }
         
         nodeEditorController.suppressEditor(true);
@@ -208,14 +196,14 @@ const DraggableCanvas = () => {
             }
 
             if (specialAction.type == ActionTypes.CreateEdges) {
-                if (srcNode?.connections.some((connection) => connection.id == tgt)) {
+                if (srcNode.hasConnection(tgt)) {
                     return;
                 }
 
-                collection.nodeManager.addConnection(src, tgt, "downstream");
+                collection.nodeManager?.addConnection(src, tgt);
             }
             else if (specialAction.type == ActionTypes.DeleteEdges) {
-                collection.nodeManager.removeConnection(src, tgt);
+                collection.nodeManager?.removeConnection(src, tgt);
             }
 
             edgeRendererController.current?.stopDrawing();   
@@ -223,11 +211,7 @@ const DraggableCanvas = () => {
         }
 
         function clearAction() {
-            collection.nodeManager.nodes.forEach((node) => {
-                node.builder().specialOutline("none");
-            })
-            collection.nodeManager.update();
-
+            collection.nodeManager?.setOutline(src, 'none');
             
             document.removeEventListener("click", handleMouseClick, { capture: true });
             document.removeEventListener("keydown", handleKeyboardEscape);

@@ -11,6 +11,7 @@ import { SideBarContext } from "../side-bar/sidebar"
 import { ActionTypes, CanvasContext } from "../../properties/canvas/canvas"
 import NodeObject, { SpecialOutline } from "./node-object"
 import { CanvasModeContext } from "../canvas-mode/canvas-mode"
+import { Node } from "../../utils/graph"
 
 export interface SharedNodeFunctions {
     onLeftMouse: () => void,
@@ -19,7 +20,7 @@ export interface SharedNodeFunctions {
 }
 
 type NodeProps = {
-    node: NodeObject,
+    node: Node<NodeObject>,
     sidebar: ReactNode,
     contextMenu: ReactNode,
     children: ReactNode
@@ -43,7 +44,7 @@ const NodeWrapper : React.FC<NodeProps> = ({node, sidebar, contextMenu, children
     }
     
     useEffect(() => {
-        outlineClassesStateManager.current.setOutlineState(node.specialOutline);
+        outlineClassesStateManager.current.setOutlineState(node.content.specialOutline);
     });
 
     const menuContext = useContext(contextMenuContext);
@@ -76,14 +77,14 @@ const NodeWrapper : React.FC<NodeProps> = ({node, sidebar, contextMenu, children
     const sidebarContext = useContext(SideBarContext);
     function focusNode() {
         if (canvasMode.mode == "edit") {
-            node.builder().specialOutline('selected').complete();
+            node.content.builder().specialOutline('selected').complete();
             boundController.current?.setListen(true);
             sidebarContext.openSideBar(sidebar);
         }
     }
 
     function unfocusNode() {
-        node.builder().specialOutline('none').complete();
+        node.content.builder().specialOutline('none').complete();
         boundController.current?.setListen(false);
     }
 
@@ -93,7 +94,7 @@ const NodeWrapper : React.FC<NodeProps> = ({node, sidebar, contextMenu, children
             y: position.y + (canvasContext.viewPortPosition.current?.y ?? 0)
         };
 
-        node.builder().position(newPosition).complete();
+        node.content.builder().position(newPosition).complete();
     }
 
     useEffect(() => {
@@ -102,7 +103,7 @@ const NodeWrapper : React.FC<NodeProps> = ({node, sidebar, contextMenu, children
 
     return (
         
-        <Draggable initialPosition={node.position} id={node.id} className="node" onDragEnd={handleDragEnd}>
+        <Draggable initialPosition={node.content.position} id={node.id} className="node" onDragEnd={handleDragEnd}>
             <BoundingBox ref={boundController} onOutOfBound={() => {unfocusNode()}} >
                 <div className={outlineClasses} onClick={focusNode} onMouseDown={openContext} data-bounding-element>
                     {children}

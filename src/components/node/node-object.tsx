@@ -1,31 +1,21 @@
 import { ReactNode } from "react";
 import { Position } from "../../utils/math/position";
-import { generateObjectId } from "../../utils/uuidGen";
-import { nodeValidation } from "./validation/node-validation";
-
-export type ConnectionType = "upstream" | "downstream"
-type Connection = {
-    id: string,
-    connectionType: ConnectionType
-}
+import { Node, Graph } from "../../utils/graph";
+import { validationMessage } from "./validation/nodeValidation";
 
 export type SpecialOutline = "none" | "constructive" | "destructive" | "selected";
 export default class NodeObject {
-    id: string;
     position: Position;
-    validationMessage: nodeValidation;
-    connections: Connection[];
+    validationMessage: validationMessage;
     specialOutline: SpecialOutline;
     update: () => void;
 
-    constructor(position: Position, id?: string) {
-        this.id = id ?? generateObjectId();
+    constructor(position: Position) {
         this.position = position;
         this.validationMessage = {
             isValid: true,
             message: ""
         };
-        this.connections = [];
         this.specialOutline = "none";
         this.update = (() => {});
     }
@@ -34,12 +24,7 @@ export default class NodeObject {
         return "node-object";
     }
 
-    getComponent(): ReactNode {
-        console.error("cannot call method on abstract class");
-        return (<></>)
-    }
-
-    validator(): (node: NodeObject, graph: NodeObject[]) => nodeValidation {
+    validator(): (node: Node<NodeObject>, graph: Graph<NodeObject>) => validationMessage {
         throw new Error("abstract method validator called");
     }
 
@@ -62,26 +47,13 @@ export class NodeObjectBuilder {
         return this;
     }
 
-    validationObject(validationObject: nodeValidation) {
+    validationObject(validationObject: validationMessage) {
         this.node.validationMessage = validationObject;
         return this;
     }
 
     specialOutline(value: SpecialOutline) {
         this.node.specialOutline = value;
-        return this;
-    }
-
-    connections(value: Connection) {
-        const alreadyExists = this.node.connections.some((connection) => {
-            connection.id = value.id
-        });
-
-        if ( alreadyExists ) {
-            throw new Error("trying to add a connection that already existed");
-        }
-
-        this.node.connections.push(value);
         return this;
     }
 

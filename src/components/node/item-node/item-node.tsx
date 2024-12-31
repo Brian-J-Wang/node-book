@@ -9,8 +9,8 @@ import CheckList, { checkListItem } from "../../form/form-components/check-list/
 
 import "./item-node.css"
 import "../../../assets/styles.css"
-import { nodeValidation } from "../validation/node-validation";
-import validateItemNode from "../validation/item-node-validator";
+import validateItemNode from "./item-node-validator";
+import { Node } from "../../../utils/graph";
 
 type ColorCode = "none" | "green" | "yellow" | "red" | "blue" | "purple";
 export class ItemNodeObject extends NodeObject {
@@ -20,8 +20,8 @@ export class ItemNodeObject extends NodeObject {
     colorCode: ColorCode;
     checkList: checkListItem[];
 
-    constructor(position: Position, id?: string) {
-        super(position, id);
+    constructor(position: Position) {
+        super(position);
         this.checked = false;
         this.title = "untitled";
         this.description = "no description";
@@ -33,14 +33,8 @@ export class ItemNodeObject extends NodeObject {
         return "item-node"
     }
 
-    validator(): (node: NodeObject, graph: NodeObject[]) => nodeValidation {
+    validator() {
         return validateItemNode;
-    }
-
-    getComponent(): ReactNode {
-        return (
-            <ItemNode node={this} key={this.id}/>
-        )
     }
 
     builder() {
@@ -82,7 +76,7 @@ class ItemNodeBuilder extends NodeObjectBuilder {
 }
 
 type ItemNodeProps = {
-    node: ItemNodeObject
+    node: Node<ItemNodeObject>
 }
 
 const colors: { code: ColorCode, color: string }[] = [
@@ -113,17 +107,15 @@ const colors: { code: ColorCode, color: string }[] = [
 ]
 
 const ItemNode = ({node} : ItemNodeProps) => {
-    const collection = useContext(CollectionContext);
-
     const numCompleteOverTotal = () => {
         let count = 0;
-        node.checkList.forEach((item) => {
+        node.content.checkList.forEach((item) => {
             if (item.checked) {
                 count++;
             }
         });
 
-        return `${count}/${node.checkList.length}`
+        return `${count}/${node.content.checkList.length}`
     }
 
     const contextMenu = (
@@ -132,7 +124,7 @@ const ItemNode = ({node} : ItemNodeProps) => {
             <ContextMenuBuilder.CMOption 
                 blurb="Delete Node"
                 onClick={() => {
-                    collection.nodeManager.removeNode(node.id);
+                    //remove node here
                 }}
             />
         </>
@@ -145,33 +137,33 @@ const ItemNode = ({node} : ItemNodeProps) => {
     return (
         <NodeWrapper 
             node={node} 
-            sidebar={<ItemNodeSideBar node={node} key={node.id}/>} 
+            sidebar={<ItemNodeSideBar node={node.content}/>} 
             contextMenu={contextMenu}>
             <div className="item-node__container style__border">
                 <div className="item-node__header">
                     <div className="item-node__header-left">
                         <input type="checkbox" className="item-node__check-box" onClick={(evt) => {evt.stopPropagation()}}/>
                         <h4 className="item-node__title">
-                            {node.title}
+                            {node.content.title}
                         </h4>
                     </div>
                     <div className="item-node__header-right">
-                        <small className="item-node__check-list-count" hidden={node.checkList.length == 0}>
+                        <small className="item-node__check-list-count" hidden={node.content.checkList.length == 0}>
                             {numCompleteOverTotal()}
                         </small>
                     </div>
                 </div>
                 {
-                    node.description != "" && (
+                    node.content.description != "" && (
                         <div className="item-node__body">
                             <small className="item-node__description">
-                                {node.description}
+                                {node.content.description}
                             </small>
                         </div>
                     )
                 }
-                <div style={{backgroundColor: getColorSwatch(node.colorCode)}} 
-                className="item-node__color-tag" hidden={node.colorCode == "none"}></div>
+                <div style={{backgroundColor: getColorSwatch(node.content.colorCode)}} 
+                className="item-node__color-tag" hidden={node.content.colorCode == "none"}></div>
             </div>
         </NodeWrapper>
     )

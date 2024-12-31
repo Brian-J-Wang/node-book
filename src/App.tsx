@@ -8,7 +8,6 @@ import MainMenu from './components/mainMenu/main-menu'
 import CanvasMode from './components/canvas-mode/canvas-mode'
 
 function App() {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const prevent = (evt: any) => { evt.preventDefault()}
@@ -23,16 +22,16 @@ function App() {
   return (
     <div className='app'>
       <div>
-        <CanvasMode>
         <Collection>
+        <CanvasMode>
           <MainMenu/>
           <ContextMenu>
           <SideBar>
           <DraggableCanvas/>
           </SideBar>
           </ContextMenu>
-        </Collection>
         </CanvasMode>
+        </Collection>
       </div>
     </div>
     

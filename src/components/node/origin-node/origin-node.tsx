@@ -6,11 +6,12 @@ import ValidationNotification from "../components/validation-notification"
 
 import "./origin-node.css"
 import "../../../assets/styles.css"
-import validateOrginNode from "../validation/origin-node-validator"
+import validateOrginNode from "./origin-node-validator"
+import { Node } from "../../../utils/graph"
 
 export class OriginNodeObject extends NodeObject {
-    constructor(position: Position, id?: string) {
-        super(position, id);
+    constructor(position: Position) {
+        super(position);
     }
 
     getType(): string {
@@ -19,12 +20,6 @@ export class OriginNodeObject extends NodeObject {
 
     validator() {
         return validateOrginNode;
-    }
-
-    getComponent(): ReactNode {
-        return (
-            <OriginNode node={this} key={this.id}/>
-        );
     }
 
     builder(): NodeObjectBuilder {
@@ -41,7 +36,7 @@ class OriginNodeBuilder extends NodeObjectBuilder {
 }
 
 interface OriginNodeProps {
-    node: OriginNodeObject;
+    node: Node<OriginNodeObject>;
 }
 
 const OriginNode = ({node}: OriginNodeProps) => {
@@ -62,12 +57,12 @@ const OriginNode = ({node}: OriginNodeProps) => {
                 start node to the node.
             </p>
             <ValidationNotification validation={
-                node.validationMessage
+                node.content.validationMessage
             }/>
         </>
     );
 
-    const validationClass = (node.validationMessage.isValid)
+    const validationClass = (node.content.validationMessage.isValid)
     ? ""
     : "origin-node__invalid"
 

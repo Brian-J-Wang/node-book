@@ -1,9 +1,10 @@
 import { createContext, ReactNode, useRef, useState } from "react"
+import { Node } from "../../utils/graph";
 
 type canvasModes = "edit" | "draw";
 export const CanvasModeContext = createContext<{
     mode: canvasModes,
-    setMode: (mode: canvasModes) => void
+    setMode: ( mode: canvasModes) => void
 }>({
     mode: "edit",
     setMode: () => {}
@@ -17,7 +18,7 @@ const CanvasMode = (props: CanvasModeProps ) => {
     const currentMode = useRef<canvasModes>("edit");
 
     function updateMode(mode: canvasModes) {
-        console.log(mode);
+        
         currentMode.current = mode;
     }
 
