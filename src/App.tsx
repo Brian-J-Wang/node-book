@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import './App.css'
 import ContextMenu from './components/contextMenu/ContextMenu'
 import Collection from './components/collection/Collection'

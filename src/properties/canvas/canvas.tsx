@@ -1,4 +1,4 @@
-import React, { createContext, RefObject, useContext, useEffect, useRef, useState } from "react"
+import React, { createContext, RefObject, useContext, useEffect, useRef} from "react"
 import { Position } from "../../utils/math/position";
 import "./canvas.css"
 import { contextMenuContext } from "../../components/contextMenu/ContextMenu";
@@ -169,10 +169,8 @@ const DraggableCanvas = () => {
 
         if (actionType == ActionTypes.CreateEdges) {
             collection.nodeManager.setOutline(src, 'constructive');
-            //rewrite logic for actionTypes
         } else if (actionType == ActionTypes.DeleteEdges) {
             collection.nodeManager.setOutline(src, 'destructive');
-            //rewrite logic for actionTypes
         }
         
         nodeEditorController.suppressEditor(true);

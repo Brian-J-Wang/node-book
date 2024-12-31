@@ -1,7 +1,5 @@
-import { ReactNode, useContext } from "react";
 import NodeWrapper from "../node-wrapper";
 import ContextMenuBuilder from "../../contextMenuBuilder/contextMenuBuilder";
-import { CollectionContext } from "../../collection/Collection";
 import NodeObject, { NodeObjectBuilder } from "../node-object";
 import { Position } from "../../../utils/math/position";
 import FormBuilder from "../../form/form";

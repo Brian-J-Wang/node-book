@@ -1,5 +1,4 @@
-import { createContext, ReactNode, useRef, useState } from "react"
-import { Node } from "../../utils/graph";
+import { createContext, ReactNode, useRef } from "react"
 
 type canvasModes = "edit" | "draw";
 export const CanvasModeContext = createContext<{

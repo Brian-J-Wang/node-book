@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import { Position } from "../../utils/math/position";
 import { Node, Graph } from "../../utils/graph";
 import { validationMessage } from "./validation/nodeValidation";
