@@ -1,0 +1,117 @@
+.meta-banner {
+    left: 0px;
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    overflow: hidden;
+    justify-content: center;
+    box-sizing: border-box;
+    transition: left 0.3s ease-in-out;
+}
+
+.meta-banner__collapsed {
+    left: -320px;
+}
+
+.meta-banner__menu {
+    box-sizing: border-box;
+    background-color: 100%;
+    background-color: white;
+    height: 100vh;
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(29, 29, 29, 0.5);
+}
+
+.menu__header {
+    display: flex;
+    border-bottom: 1px solid rgba(29, 29, 29, 0.5);
+}
+
+.menu__home-button {
+    height: 42px;
+    min-width: 42px;
+    border: none;
+    border-right: 1px solid rgba(29, 29, 29, 0.5);
+    cursor: pointer;
+    background-color: white;
+}
+
+.menu__home-button:hover {
+    background-color: whitesmoke;
+}
+
+.menu__home-icon {
+    height: 20px;
+    width: 20px;
+}
+
+.menu__title {
+    height: 100%;
+    margin: 0px;
+    font-size: 1.4em;
+    line-height: 1.4em;
+    align-self: center;
+    margin-left: 0px;
+    padding: 0px 0px 0px 8px;
+    border: none;
+    min-width: 50px;
+    font-weight: 600;
+    outline: none;
+}
+
+.menu__title:hover {
+    background-color: whitesmoke;
+}
+
+.menu__footer {
+    margin-top: auto;
+    padding: 16px;
+}
+
+.menu__socials {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.menu__social-icon {
+    height: 24px;
+    width: 24px;
+    opacity: 70%;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.menu__social-icon:hover {
+    opacity: 100%;
+}
+
+.menu__footer-blurb {
+    display: block;
+    text-align: center;
+}
+
+.meta-banner__tab {
+    align-self: center;
+    height: 64px;
+    width: 32px;
+    border: none;
+    display: flex;
+    background-color: rgba(0, 0, 0, 0);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 25%;
+    transition: opacity 0.2s ease-in-out
+}
+
+.meta-banner__tab:hover {
+    opacity: 50%;
+}
+
+.meta-banner__image {
+    height: 64px;
+    box-sizing: border-box;
+}

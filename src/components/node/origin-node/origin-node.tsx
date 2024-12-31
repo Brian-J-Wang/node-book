@@ -1,69 +1,41 @@
-import { ReactNode } from "react"
-import "./origin-node.css"
 import NodeWrapper from "../node-wrapper"
-import NodeObject, { NodeObjectBuilder, NodeValidationObject, } from "../node-object"
+import NodeObject, { NodeObjectBuilder } from "../node-object"
 import { Position } from "../../../utils/math/position"
-import { EdgeProps } from "../../edge/edge"
 import ValidationNotification from "../components/validation-notification"
 
+import "./origin-node.css"
+import "../../../assets/styles.css"
+import validateOrginNode from "./origin-node-validator"
+import { Node } from "../../../utils/graph"
+
 export class OriginNodeObject extends NodeObject {
-    constructor(position: Position, id?: string) {
-        super(position, id);
+    constructor(position: Position) {
+        super(position);
     }
 
     getType(): string {
         return "origin-node";
     }
 
-    validate(nodes: NodeObject[], edges: EdgeProps[]): NodeValidationObject {
-        //there cannot be more than two instances of it.
-        for (let i = 0; i < nodes.length; i++) {
-            if (nodes[i].getType() == "origin-node" && nodes[i].id != this.id) {
-                return {
-                    isValid: false,
-                    message: "Multiple copies of origin node is not allowed to exist."
-                };
-            }
-        }
-
-        //edges cannot lead to this node
-        for (let i = 0; i < edges.length; i++) {
-            if (edges[i].terminalNode == this.id) {
-                return {
-                    isValid: false,
-                    message: "Origin node is not allowed to have paths leading to it."
-                };
-            }
-        }
-
-        return {
-            isValid: true,
-            message: ""
-        }
-    }
-
-    getComponent(): ReactNode {
-        return (
-            <OriginNode node={this} key={this.id}/>
-        );
+    validator() {
+        return validateOrginNode;
     }
 
     builder(): NodeObjectBuilder {
-        return new OriginNodeBuilder(this);
+        return new OriginNodeBuilder(this, this.update);
     }
 }
 
 class OriginNodeBuilder extends NodeObjectBuilder {
     node: OriginNodeObject;
-    constructor(source: OriginNodeObject) {
-        super(source);
-        this.node = new OriginNodeObject({x: 0, y: 0});
-        this.node = Object.assign(this.node, source);
+    constructor(source: OriginNodeObject, update: () => void) {
+        super(source, update);
+        this.node = source;
     }
 }
 
 interface OriginNodeProps {
-    node: OriginNodeObject;
+    node: Node<OriginNodeObject>;
 }
 
 const OriginNode = ({node}: OriginNodeProps) => {
@@ -84,12 +56,12 @@ const OriginNode = ({node}: OriginNodeProps) => {
                 start node to the node.
             </p>
             <ValidationNotification validation={
-                node.validationMessage
+                node.content.validationMessage
             }/>
         </>
     );
 
-    const validationClass = (node.validationMessage.isValid)
+    const validationClass = (node.content.validationMessage.isValid)
     ? ""
     : "origin-node__invalid"
 
@@ -98,7 +70,7 @@ const OriginNode = ({node}: OriginNodeProps) => {
             node={node} 
             sidebar={sideBar} 
             contextMenu={<></>}>
-            <div className={"origin-node " + validationClass}>           
+            <div className={"origin-node style__border " + validationClass}>           
                 Start Here
             </div>
         </NodeWrapper>

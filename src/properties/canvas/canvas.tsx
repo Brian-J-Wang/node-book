@@ -1,4 +1,4 @@
-import React, { createContext, RefObject, useContext, useEffect, useRef, useState } from "react"
+import React, { createContext, RefObject, useContext, useEffect, useRef} from "react"
 import { Position } from "../../utils/math/position";
 import "./canvas.css"
 import { contextMenuContext } from "../../components/contextMenu/ContextMenu";
@@ -8,6 +8,7 @@ import EdgeRenderer, { edgeRendererHandle } from "../../components/edgeRenderer/
 import { NodeEditorContext } from "../../components/nodeEditor/nodeEditor";
 import NodeRenderer from "../../components/nodeRenderer/nodeRenderer";
 import { ItemNodeObject } from "../../components/node/item-node/item-node";
+import { CanvasModeContext } from "../../components/canvas-mode/canvas-mode";
 
 export enum ActionTypes {
     CreateEdges = "CreateEdges",
@@ -21,24 +22,16 @@ type SpecialAction = {
     invalidTargets?: string[]
 }
 
-type CanvasContext = {
+type canvasContext = {
     viewPortPosition: RefObject<Position>,
     canvasOffset: Position,
-    specialAction?: SpecialAction
     drawConnection: (nodeId: string, type: ActionTypes) => void
-    specialActionComplete: () => void
 }
 // eslint-disable-next-line react-refresh/only-export-components
-export const CanvasContext = createContext<CanvasContext>({
+export const CanvasContext = createContext<canvasContext>({
     viewPortPosition: {} as RefObject<Position>,
     canvasOffset: {x: 0, y: 0},
-    specialAction: {
-        for: "",
-        type: ActionTypes.CreateEdges,
-        validTargets: []
-    },
     drawConnection: () => {},
-    specialActionComplete: () => {}
 })
 
 const DraggableCanvas = () => {
@@ -47,7 +40,7 @@ const DraggableCanvas = () => {
     const mouseAnchorPosition = useRef<Position>({x: 0, y: 0});
     const viewPortDimensions = useRef<Position>({x: 0, y: 0});
     const collection = useContext(CollectionContext);
-    const dimensions = {x: 5000, y: 5000}
+    const dimensions = {x: 5000, y: 5000};
 
     useEffect(() => {
         const element = document.querySelector(".draggable-canvas");
@@ -122,7 +115,6 @@ const DraggableCanvas = () => {
             y: y
         }
     }
-
     
     //context menus stuff
     const contextMenu = useContext(contextMenuContext);
@@ -134,7 +126,10 @@ const DraggableCanvas = () => {
                         x: evt.clientX + position.current.x,
                         y: evt.clientY + position.current.y
                     }
-                    collection.addNode(new ItemNodeObject(newPosition));
+
+                    if (collection.nodeManager) {
+                        collection.nodeManager.addNode(new ItemNodeObject(newPosition));
+                    }
                 }}
                 blurb="Add Node"
             />
@@ -148,11 +143,15 @@ const DraggableCanvas = () => {
         }
     }
     
-    const [specialAction, setSpecialAction] = useState<SpecialAction | undefined>(undefined);
     const edgeRendererController = useRef<edgeRendererHandle>() as RefObject<edgeRendererHandle>;
     const nodeEditorController = useContext(NodeEditorContext);
-    const drawConnection = (startNode: string, actionType: ActionTypes) => {
-        const rect = document.getElementById(startNode)?.getBoundingClientRect();
+    const canvasMode = useContext(CanvasModeContext);
+    const drawConnection = (src: string, actionType: ActionTypes) => {
+        if (!collection.nodeManager) {
+            return;
+        }
+        
+        const rect = document.getElementById(src)?.getBoundingClientRect();
         if (rect) {
             edgeRendererController.current?.startDrawing({
                 x: rect.x + (position.current.x) + (rect.width / 2),
@@ -160,21 +159,22 @@ const DraggableCanvas = () => {
             })
         }
 
-        const specialActionState: SpecialAction = {
-            for: startNode,
+        const srcNode = collection.nodeManager.getNode(src);
+        canvasMode.setMode("draw");
+
+        const specialAction: SpecialAction = {
+            for: src,
             type: actionType,
         };
-        
-        if (actionType == ActionTypes.DeleteEdges) {
-            specialActionState.validTargets = collection.getValidDeleteTargets(startNode);
-        } else if (actionType == ActionTypes.CreateEdges) {
-            specialActionState.invalidTargets = collection.getInvalidConnectTargets(startNode);
+
+        if (actionType == ActionTypes.CreateEdges) {
+            collection.nodeManager.setOutline(src, 'constructive');
+        } else if (actionType == ActionTypes.DeleteEdges) {
+            collection.nodeManager.setOutline(src, 'destructive');
         }
-        setSpecialAction(specialActionState);
-        
         
         nodeEditorController.suppressEditor(true);
-        document.addEventListener("click", handleMouseClick);
+        document.addEventListener("click", handleMouseClick, { capture: true });
         document.addEventListener("keydown", handleKeyboardEscape);
 
         function handleKeyboardEscape(evt: KeyboardEvent) {
@@ -188,56 +188,44 @@ const DraggableCanvas = () => {
             evt.stopImmediatePropagation();
 
             const evtTarget = evt.target as Element;
-            const terminalNode = evtTarget.closest(".node")?.id ?? null;
-            if (!terminalNode || terminalNode == startNode) {
+            const tgt = evtTarget.closest(".node")?.id ?? null;
+            if (!tgt || tgt == src) {
                 return;
             }
 
-            console.log("handling state");
+            if (specialAction.type == ActionTypes.CreateEdges) {
+                if (srcNode.hasConnection(tgt)) {
+                    return;
+                }
 
-            if (specialActionState.type == ActionTypes.CreateEdges) {
-                if (specialActionState.invalidTargets?.includes(terminalNode)) {
-                    return;
-                } else {
-                    collection.addEdge({
-                        startingNode: startNode,
-                        terminalNode: terminalNode
-                    });
-                }
-            } else if (specialActionState?.type == ActionTypes.DeleteEdges) {
-                console.log('handling delete');
-                if (specialActionState.validTargets?.includes(terminalNode)) {
-                    collection.removeEdge(startNode, terminalNode);
-                } else {
-                    return;
-                }
+                collection.nodeManager?.addConnection(src, tgt);
+            }
+            else if (specialAction.type == ActionTypes.DeleteEdges) {
+                collection.nodeManager?.removeConnection(src, tgt);
             }
 
-            clearAction();
             edgeRendererController.current?.stopDrawing();   
+            clearAction();
         }
 
         function clearAction() {
-            nodeEditorController.suppressEditor(false);
-            setSpecialAction(undefined);
-            document.removeEventListener("click", handleMouseClick);
+            collection.nodeManager?.setOutline(src, 'none');
+            
+            document.removeEventListener("click", handleMouseClick, { capture: true });
             document.removeEventListener("keydown", handleKeyboardEscape);
+            nodeEditorController.suppressEditor(false);
+            canvasMode.setMode("edit");
         }
-    }
-
-    const specialActionComplete = () => {
-        setSpecialAction(undefined);
     }
 
     return (
         <CanvasContext.Provider value={{
                 canvasOffset: {x: dimensions.x / 2, y: dimensions.y / 2}, 
                 viewPortPosition: position,
-                specialAction: specialAction,
-                drawConnection: drawConnection,
-                specialActionComplete: specialActionComplete
+                drawConnection: drawConnection
             }}>
-            <div onDragStart={handleDragStart} onDrag={handleDrag} onMouseDown={handleClick} className="draggable-canvas" id="draggable-canvas" draggable>
+            <div onDragStart={handleDragStart} onDrag={handleDrag} onMouseDown={handleClick} className="draggable-canvas" 
+            id="draggable-canvas" draggable>
                 <div style={{height: dimensions.y, width: dimensions.x}} className="draggable-canvas__dimension-element">
                     <NodeRenderer/>
                     <EdgeRenderer ref={edgeRendererController} />

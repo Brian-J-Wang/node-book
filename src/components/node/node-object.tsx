@@ -1,53 +1,44 @@
-import { ReactNode } from "react";
 import { Position } from "../../utils/math/position";
-import { generateObjectId } from "../../utils/uuidGen";
-import { EdgeProps } from "../edge/edge";
+import { Node, Graph } from "../../utils/graph";
+import { validationMessage } from "./validation/nodeValidation";
 
-export type NodeValidationObject = {
-    isValid: boolean,
-    message: string
-}
-
+export type SpecialOutline = "none" | "constructive" | "destructive" | "selected";
 export default class NodeObject {
-    id: string;
     position: Position;
-    validationMessage: NodeValidationObject;
+    validationMessage: validationMessage;
+    specialOutline: SpecialOutline;
+    update: () => void;
 
-    constructor(position: Position, id?: string) {
-        this.id = id ?? generateObjectId();
+    constructor(position: Position) {
         this.position = position;
         this.validationMessage = {
             isValid: true,
             message: ""
-        }
+        };
+        this.specialOutline = "none";
+        this.update = (() => {});
     }
 
     getType(): string {
         return "node-object";
     }
 
-    getComponent(): ReactNode {
-        console.error("cannot call method on abstract class");
-        return (<></>)
-    }
-
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    validate(nodes: NodeObject[], edges: EdgeProps[]): NodeValidationObject {
-        console.error("validate not set-up for abstract method");
-        return this.validationMessage;
+    validator(): (node: Node<NodeObject>, graph: Graph<NodeObject>) => validationMessage {
+        throw new Error("abstract method validator called");
     }
 
     builder() {
-        return new NodeObjectBuilder(this);
+        const builder = new NodeObjectBuilder(this, this.update);
+        return builder;
     }
 }
 
 export class NodeObjectBuilder {
     node: NodeObject;
-    constructor(source: NodeObject) {
-        this.node = new NodeObject({x: 0, y: 0});
-        this.node = Object.assign(this.node, source);
+    update: () => void;
+    constructor(source: NodeObject, update: () => void) {
+        this.node = source;
+        this.update = update;
     }
 
     position(newPosition: Position) {
@@ -55,12 +46,17 @@ export class NodeObjectBuilder {
         return this;
     }
 
-    validationObject(validationObject: NodeValidationObject) {
+    validationObject(validationObject: validationMessage) {
         this.node.validationMessage = validationObject;
         return this;
     }
 
+    specialOutline(value: SpecialOutline) {
+        this.node.specialOutline = value;
+        return this;
+    }
+
     complete() {
-        return this.node;
+        this.update();
     }
 }

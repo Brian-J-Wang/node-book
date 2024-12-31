@@ -6,11 +6,12 @@ import { contextMenuContext } from "../contextMenu/ContextMenu"
 import ContextMenuBuilder from "../contextMenuBuilder/contextMenuBuilder"
 import createConnection from "../../assets/create-connection.svg"
 import crossMark from "../../assets/cross.svg"
-import { CollectionContext } from "../collection/Collection"
 import BoundingBox, { OutofBoundsHandle } from "../../properties/detectOutofBounds/boundingBox"
 import { SideBarContext } from "../side-bar/sidebar"
 import { ActionTypes, CanvasContext } from "../../properties/canvas/canvas"
-import NodeObject from "./node-object"
+import NodeObject, { SpecialOutline } from "./node-object"
+import { CanvasModeContext } from "../canvas-mode/canvas-mode"
+import { Node } from "../../utils/graph"
 
 export interface SharedNodeFunctions {
     onLeftMouse: () => void,
@@ -19,7 +20,7 @@ export interface SharedNodeFunctions {
 }
 
 type NodeProps = {
-    node: NodeObject,
+    node: Node<NodeObject>,
     sidebar: ReactNode,
     contextMenu: ReactNode,
     children: ReactNode
@@ -28,10 +29,9 @@ type NodeProps = {
 const NodeWrapper : React.FC<NodeProps> = ({node, sidebar, contextMenu, children}) => {
     const [outlineClasses, setOutlineClasses] = useState<string>("");
     const outlineClassesStateManager = useRef<NodeOutlineManager>(new NodeOutlineManager(setOutlineClasses))
-    const collectionContext = useContext(CollectionContext);
     const boundController = useRef<OutofBoundsHandle>() as RefObject<OutofBoundsHandle>;
-    const [isSelected, setIsSelected] = useState<boolean>();
     const canvasContext = useContext(CanvasContext);
+    const canvasMode = useContext(CanvasModeContext);
 
     function handleDrawConnection(evt: React.MouseEvent) {
         evt.stopPropagation();
@@ -43,36 +43,8 @@ const NodeWrapper : React.FC<NodeProps> = ({node, sidebar, contextMenu, children
         canvasContext.drawConnection(node.id, ActionTypes.DeleteEdges);
     }
     
-    useEffect(() => {    
-        if (isSelected) {
-            outlineClassesStateManager.current.setOutlineState(OutlineState.selected);
-            return;
-        }
-
-        if (canvasContext.specialAction == undefined || canvasContext.specialAction.for == node.id) {
-            outlineClassesStateManager.current.setOutlineState(OutlineState.none);
-            return;
-        }
-
-        if (isValidTarget()) {
-            if ((canvasContext.specialAction.type === ActionTypes.CreateEdges)) {
-                outlineClassesStateManager.current.setOutlineState(OutlineState.constructive);
-                return;
-            } else if ((canvasContext.specialAction.type === ActionTypes.DeleteEdges)) {
-                outlineClassesStateManager.current.setOutlineState(OutlineState.destructive);
-                return;
-            }
-        }
-
-        function isValidTarget() {
-            if (canvasContext.specialAction?.invalidTargets) {
-                return !canvasContext.specialAction.invalidTargets?.includes(node.id);
-            } else if (canvasContext.specialAction?.validTargets) {
-                return canvasContext.specialAction.validTargets?.includes(node.id);
-            } else {
-                return false;
-            }
-        }
+    useEffect(() => {
+        outlineClassesStateManager.current.setOutlineState(node.content.specialOutline);
     });
 
     const menuContext = useContext(contextMenuContext);
@@ -104,13 +76,15 @@ const NodeWrapper : React.FC<NodeProps> = ({node, sidebar, contextMenu, children
 
     const sidebarContext = useContext(SideBarContext);
     function focusNode() {
-        setIsSelected(true);
-        boundController.current?.setListen(true);
-        sidebarContext.openSideBar(sidebar);
+        if (canvasMode.mode == "edit") {
+            node.content.builder().specialOutline('selected').complete();
+            boundController.current?.setListen(true);
+            sidebarContext.openSideBar(sidebar);
+        }
     }
 
     function unfocusNode() {
-        setIsSelected(false);
+        node.content.builder().specialOutline('none').complete();
         boundController.current?.setListen(false);
     }
 
@@ -120,12 +94,16 @@ const NodeWrapper : React.FC<NodeProps> = ({node, sidebar, contextMenu, children
             y: position.y + (canvasContext.viewPortPosition.current?.y ?? 0)
         };
 
-        collectionContext.updateNode(node.builder().position(newPosition).complete());
-    }    
+        node.content.builder().position(newPosition).complete();
+    }
+
+    useEffect(() => {
+        console.log("mode changed");
+    }, [canvasMode.mode])
 
     return (
         
-        <Draggable initialPosition={node.position} id={node.id} className="node" onDragEnd={handleDragEnd}>
+        <Draggable initialPosition={node.content.position} id={node.id} className="node" onDragEnd={handleDragEnd}>
             <BoundingBox ref={boundController} onOutOfBound={() => {unfocusNode()}} >
                 <div className={outlineClasses} onClick={focusNode} onMouseDown={openContext} data-bounding-element>
                     {children}
@@ -133,13 +111,6 @@ const NodeWrapper : React.FC<NodeProps> = ({node, sidebar, contextMenu, children
             </BoundingBox>
         </Draggable>
     )
-}
-
-enum OutlineState {
-    none,
-    selected,
-    constructive,
-    destructive
 }
 
 class NodeOutlineManager {
@@ -150,18 +121,18 @@ class NodeOutlineManager {
         this.stateFunction = stateFunction;
     }
 
-    setOutlineState(state: OutlineState) {
+    setOutlineState(state: SpecialOutline) {
         switch(state) {
-            case OutlineState.none:
+            case "none":
                 this.stateFunction(this.baseString);
                 break;
-            case OutlineState.selected:
+            case "selected":
                 this.stateFunction(this.baseString + " n__action-outline__selected");
                 break;
-            case OutlineState.constructive:
+            case "constructive":
                 this.stateFunction(this.baseString + " n__action-outline__constructive");
                 break;
-            case OutlineState.destructive:
+            case "destructive":
                 this.stateFunction(this.baseString + " n__action-outline__destructive");
                 break;
         }

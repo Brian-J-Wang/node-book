@@ -15,7 +15,12 @@ type edgeRendererProps = {
     edgeStyle?: string
 }
 
-const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>((props, ref) => {
+type edgeSVG = {
+    start: string,
+    end: string
+}
+
+const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>((_props, ref) => {
     const collection = useContext(CollectionContext);
     const [isDrawing, setIsDrawing] = useState<boolean>(false);
     const [drawStart, setDrawStart] = useState<Position>({x: 0, y: 0});
@@ -23,7 +28,6 @@ const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>((props, r
 
     useImperativeHandle(ref, () => ({
         startDrawing: (start) => {
-            console.log("started Drawing");
             setIsDrawing(true);
             setDrawStart({
                 x: start.x,
@@ -51,6 +55,29 @@ const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>((props, r
         }
     }, []);
 
+    const [edges, setEdges] = useState<edgeSVG[]>([]);
+    useEffect(() => {
+        const validEdges: edgeSVG[] = [];
+
+        if (!collection.nodeManager) {
+            return;
+        }
+        
+        collection.nodeManager.forEach((node) => {
+            const connections = node.getConnections("downstream").map((connection) => {
+                return {
+                    start: node.id,
+                    end: connection.node.id
+                }
+            });
+
+            validEdges.push( ...connections );
+
+        })
+
+        setEdges(validEdges);
+    }, [collection.nodes])
+
     return(
         <svg className="edge-renderer" viewBox={`0 0 5000 5000`}  width={5000} height={5000}>
             <defs>
@@ -70,9 +97,9 @@ const EdgeRenderer = forwardRef<edgeRendererHandle, edgeRendererProps>((props, r
                     y2={mousePosition.y + (canvasContext.viewPortPosition.current?.y ?? 0)} className="edge-renderer__fake-line" markerEnd="url(#arrow)"/>
             ) : (<></>)}
             {
-                collection.edges.map((edge) => {
+                edges.map((edge) => {
                     return (
-                        <Edge key={`${edge.startingNode}${edge.terminalNode}`} startingNode={edge.startingNode} terminalNode={edge.terminalNode} marker="url(#arrow)"/>
+                        <Edge key={`${edge.start}${edge.end}`} startingNode={edge.start} terminalNode={edge.end} marker="url(#arrow)"/>
                     )
                 })
             }
