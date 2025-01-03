@@ -21,9 +21,25 @@
 }
 
 .item-node__check-box {
+    appearance: none;
+    border: 1px solid rgba(29, 29, 29, 0.5);
+    border-radius: 3px;
     margin: 0px;
     width: 16px;
     height: 16px;
+}
+
+.item-node__check-box:checked {
+    background-color: #74A12E;
+}
+
+.item-node__check-box:disabled {
+    background-color: lightgray;
+}
+
+.item-node__check-box_disabled {
+    background-color: lightgray;
+    border: 1px dashed rgba(29, 29, 29, 0.35);
 }
 
 .item-node__title {

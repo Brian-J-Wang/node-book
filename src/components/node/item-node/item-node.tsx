@@ -12,14 +12,17 @@ import { Node } from "../../../utils/graph";
 
 type ColorCode = "none" | "green" | "yellow" | "red" | "blue" | "purple";
 export class ItemNodeObject extends NodeObject {
+    checkable: boolean;
     checked: boolean;
     title: string;
     description: string;
     colorCode: ColorCode;
     checkList: checkListItem[];
+    
 
     constructor(position: Position) {
         super(position);
+        this.checkable = true;
         this.checked = false;
         this.title = "untitled";
         this.description = "no description";
@@ -69,6 +72,11 @@ class ItemNodeBuilder extends NodeObjectBuilder {
 
     checkList(value: checkListItem[]) {
         this.node.checkList = value;
+        return this;
+    }
+
+    checkable(value: boolean) {
+        this.node.checkable = value;
         return this;
     }
 }
@@ -132,6 +140,13 @@ const ItemNode = ({node} : ItemNodeProps) => {
         return colors.find(color => color.code == code)?.color;
     }
 
+    const handleCheckboxClick = (evt: React.ChangeEvent<HTMLInputElement>) => {
+        evt.stopPropagation();
+        if (node.content.checkable) {
+            node.content.builder().checked(!node.content.checked).complete();
+        }
+    }
+
     return (
         <NodeWrapper 
             node={node} 
@@ -140,7 +155,7 @@ const ItemNode = ({node} : ItemNodeProps) => {
             <div className="item-node__container style__border">
                 <div className="item-node__header">
                     <div className="item-node__header-left">
-                        <input type="checkbox" className="item-node__check-box" onClick={(evt) => {evt.stopPropagation()}}/>
+                        <input type="checkbox" className="item-node__check-box" onChange={handleCheckboxClick} checked={node.content.checked} disabled={!node.content.checkable}/>
                         <h4 className="item-node__title">
                             {node.content.title}
                         </h4>
