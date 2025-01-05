@@ -35,6 +35,7 @@ class NodeManager {
     removeNode(id: string) {
         const elementExisted = this.graph.removeNode(id);
 
+        this.validateAll()
         if (elementExisted) {
             this.update();
         }
@@ -43,15 +44,13 @@ class NodeManager {
     addConnection(src: string, tgt: string) {
         this.graph.addConnection(src, tgt);
 
-        this.validate(src);
-        this.validate(tgt);
+        this.validateAll()
     }
 
     removeConnection(src1: string, src2: string) {
         this.graph.removeConnection(src1, src2);
 
-        this.validate(src1);
-        this.validate(src2);
+        this.validateAll()
     }
 
     //@ devcl [] refactor: update the validation logic to be more efficient.
@@ -64,6 +63,13 @@ class NodeManager {
         })
 
         this.update();
+    }
+
+    validateAll() {
+        this.graph.nodes.forEach((node) => {
+            const validator = node.content.validator();
+            validator(node, this.graph);
+        })
     }
 
     forEach(fn: (node: Node<NodeObject>) => void){
@@ -112,6 +118,7 @@ class NodeManager {
     }
 
     update() {
+        this.validateAll()
         if (this.dispatch) {
             this.dispatch(this.graph.snapshot());
         }

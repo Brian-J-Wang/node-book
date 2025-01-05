@@ -116,8 +116,6 @@ export class Graph<T> {
         const queue = [ src ];
         const visited = new Set<string>();
 
-        console.log("traversing");
-
         while ( queue.length != 0 ) {
             const id = queue.shift() ?? "";
             if (visited.has(id)) {

@@ -19,7 +19,6 @@ export class ItemNodeObject extends NodeObject {
     description: string;
     colorCode: ColorCode;
     checkList: checkListItem[];
-    
 
     constructor(position: Position) {
         super(position);

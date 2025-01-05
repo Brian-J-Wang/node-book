@@ -3,11 +3,15 @@ import { Position } from "../../utils/math/position"
 
 import "./edge.css"
 import { CanvasContext } from "../../properties/canvas/canvas"
+import { CollectionContext } from "../collection/Collection"
+import { Node } from "../../utils/graph"
+import NodeObject from "../node/node-object"
+import { OriginNodeObject } from "../node/origin-node/origin-node"
+import { ItemNodeObject } from "../node/item-node/item-node"
 
 export type EdgeProps = {
     startingNode: string,
     terminalNode: string
-    marker?: string
 }
 
 const Edge : React.FC<EdgeProps> = ({ startingNode, terminalNode }) => {
@@ -90,6 +94,52 @@ const Edge : React.FC<EdgeProps> = ({ startingNode, terminalNode }) => {
         return `M${startingPosition.x} ${startingPosition.y}` + points.map((point) => `L${point.x} ${point.y}`).join(' ');
     }
 
+    const collectionContext = useContext(CollectionContext);
+    function pathFactory() {
+        const startNode = collectionContext.nodeManager?.getNode(startingNode);
+        const endNode = collectionContext.nodeManager?.getNode(terminalNode);
+
+        if (startNode && endNode) {
+            const startChecked = calculateChecked(startNode as Node<NodeObject>);
+            const endChecked = calculateChecked(endNode as Node<NodeObject>);
+
+            function calculateChecked(node: Node<NodeObject>) {
+                if (node.content instanceof OriginNodeObject) {
+                    return true;
+                } else if (node.content instanceof ItemNodeObject) {
+                    return node.content.checked;
+                }
+            }
+
+            if (!startChecked && !endChecked) {
+                return (
+                    <path d={subDividePath(4)}
+                    stroke="grey" strokeWidth={6}
+                    className="line"
+                    />
+                )
+            } else if ((!startChecked && endChecked) || (startChecked && !endChecked)) {
+                return (
+                    <path d={subDividePath(4)}
+                    stroke="white" strokeWidth={6}
+                    className="line"
+                    markerMid="url(#arrow)"
+                    />
+                )
+            } else {
+                return (
+                    <path d={subDividePath(4)}
+                    stroke="black" strokeWidth={6}
+                    className="line"
+                    />
+                )
+            }
+
+        } else {
+            return <></>
+        }
+    }
+
     return (
         <>
             <line
@@ -97,14 +147,10 @@ const Edge : React.FC<EdgeProps> = ({ startingNode, terminalNode }) => {
             x2={terminalPosition.x} y2={terminalPosition.y}
             stroke="#292929" strokeWidth={8} opacity={'100%'}
             />
-            <path d={subDividePath(4)}
-            stroke="white" strokeWidth={6}
-            className="line"
-            markerMid="url(#arrow)"
-            />
-            
+            {
+                pathFactory()
+            }
         </>
-        
     )
 }
 
