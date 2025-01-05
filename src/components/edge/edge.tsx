@@ -114,7 +114,7 @@ const Edge : React.FC<EdgeProps> = ({ startingNode, terminalNode }) => {
             if (!startChecked && !endChecked) {
                 return (
                     <path d={subDividePath(4)}
-                    stroke="grey" strokeWidth={6}
+                    stroke="white" strokeWidth={6}
                     className="line"
                     />
                 )
