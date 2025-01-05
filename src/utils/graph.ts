@@ -112,6 +112,27 @@ export class Graph<T> {
         }
     }
 
+    traverse(src: string, fn: (node: Node<T>) => boolean, direction: connectionType = 'both') {
+        const queue = [ src ];
+
+        while ( queue.length != 0 ) {
+            const id = queue.shift() ?? "";
+            const node = this.getNode(id);
+
+            if (!node) {
+                break;
+            }
+
+            const propagate = fn(node);
+
+            if (propagate) {
+                node.getConnections(direction).forEach((connections) => {
+                    queue.push(connections.node.id);
+                })
+            }
+        }
+    }
+
     snapshot() {
         return Array.from(this.nodes.values());
     }

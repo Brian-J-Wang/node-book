@@ -1,3 +1,7 @@
+.item-node__invalid {
+    box-shadow: 2px 2px 0px red;
+}
+
 .item-node__container {
     min-width: 200px;
     width: 200px;

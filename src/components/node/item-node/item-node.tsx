@@ -147,12 +147,16 @@ const ItemNode = ({node} : ItemNodeProps) => {
         }
     }
 
+    const validationClass = (node.content.validationMessage.isValid)
+    ? ""
+    : "item-node__invalid"
+
     return (
         <NodeWrapper 
             node={node} 
             sidebar={<ItemNodeSideBar node={node.content}/>} 
             contextMenu={contextMenu}>
-            <div className="item-node__container style__border">
+            <div className={`item-node__container style__border ${validationClass}`}>
                 <div className="item-node__header">
                     <div className="item-node__header-left">
                         <input type="checkbox" className="item-node__check-box" onChange={handleCheckboxClick} checked={node.content.checked} disabled={!node.content.checkable}/>

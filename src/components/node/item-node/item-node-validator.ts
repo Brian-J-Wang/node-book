@@ -1,9 +1,15 @@
 import { Node, Graph } from "../../../utils/graph";
 import NodeObject from "../node-object";
-import { validNodeMessage, validationMessage } from "../validation/nodeValidation";
 
-function validateItemNode(_node: Node<NodeObject>, _graph: Graph<NodeObject>): validationMessage {    
-    return validNodeMessage;
+function validateItemNode(node: Node<NodeObject>, graph: Graph<NodeObject>): boolean {
+    //item nodes cannot connect to upstream nodes
+    graph.
+
+    node.content.builder().validationObject({
+        isValid: true,
+        message: ""
+    })
+    return true;
 }
 
 export default validateItemNode;

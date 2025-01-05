@@ -1,10 +1,10 @@
-import { nodeValidation } from "../node-object"
+import { validationMessage } from "../validation/nodeValidation";
 import warningIcon from "../../../assets/warning-icon.svg"
 
 import "./validation-notification.css"
 
 interface ValidationNotifcationProps {
-    validation: nodeValidation;
+    validation: validationMessage;
 }
 
 const ValidationNotification = (props: ValidationNotifcationProps) => {

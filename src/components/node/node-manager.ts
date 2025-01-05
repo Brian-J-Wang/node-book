@@ -55,11 +55,24 @@ class NodeManager {
     }
 
     validate(id: string) {
-        const node = this.graph.getNode(id);
-        const validator = node.content.validator();
-        const message = validator(node, this.graph);
+        const queue: Node<NodeObject>[] = [ this.graph.getNode(id) ];
 
-        node.content.builder().validationObject(message).complete();
+        while (queue.length != 0 ) {
+            const node = queue.shift();
+
+            if (!node) {
+                break;
+            }
+
+            const validator = node.content.validator();
+            const isValid = validator(node, this.graph);
+
+            if (!isValid) {
+                queue.push( ...node.getConnections().map((item) => item.node));
+            }
+        }
+
+        this.update();
     }
 
     forEach(fn: (node: Node<NodeObject>) => void){
@@ -81,7 +94,7 @@ class NodeManager {
                     item.node.content.builder().specialOutline('none');
                 })
 
-                this.traverse(tgt, (item) => {
+                this.graph.traverse(tgt, (item) => {
                     item.content.builder().specialOutline('none');
                     return true;
                 }, 'upstream');
@@ -104,32 +117,6 @@ class NodeManager {
     
                 this.update();
                 break;
-        }
-    }
-
-    traverse(src: string, fn: (node: Node<NodeObject>) => boolean, direction: connectionType) {
-        if (direction == 'both') {
-            console.error("cannot use both as that would create infinite loop, use forEach instead");
-            return;
-        }
-
-        const queue = [ src ];
-
-        while (queue.length != 0) {
-            const id = queue.shift() ?? "";
-            const node = this.getNode<NodeObject>(id);
-
-            if (!node) {
-                break;
-            }
-
-            const propagate = fn(node);
-
-            if (propagate) {
-                node.getConnections(direction).forEach((connections) => {
-                    queue.push(connections.node.id);
-                })
-            }
         }
     }
 
