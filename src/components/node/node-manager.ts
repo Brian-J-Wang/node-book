@@ -35,6 +35,7 @@ class NodeManager {
     removeNode(id: string) {
         const elementExisted = this.graph.removeNode(id);
 
+        this.validateAll()
         if (elementExisted) {
             this.update();
         }
@@ -43,23 +44,32 @@ class NodeManager {
     addConnection(src: string, tgt: string) {
         this.graph.addConnection(src, tgt);
 
-        this.validate(src);
-        this.validate(tgt);
+        this.validateAll()
     }
 
     removeConnection(src1: string, src2: string) {
         this.graph.removeConnection(src1, src2);
 
-        this.validate(src1);
-        this.validate(src2);
+        this.validateAll()
     }
 
+    //@ devcl [] refactor: update the validation logic to be more efficient.
+    // validation logic currently iterates through entire graph.
     validate(id: string) {
-        const node = this.graph.getNode(id);
-        const validator = node.content.validator();
-        const message = validator(node, this.graph);
+        this.graph.traverse(id, (node) => {
+            const validator = node.content.validator();
+            validator(node, this.graph);
+            return true;
+        })
 
-        node.content.builder().validationObject(message).complete();
+        this.update();
+    }
+
+    validateAll() {
+        this.graph.nodes.forEach((node) => {
+            const validator = node.content.validator();
+            validator(node, this.graph);
+        })
     }
 
     forEach(fn: (node: Node<NodeObject>) => void){
@@ -81,7 +91,7 @@ class NodeManager {
                     item.node.content.builder().specialOutline('none');
                 })
 
-                this.traverse(tgt, (item) => {
+                this.graph.traverse(tgt, (item) => {
                     item.content.builder().specialOutline('none');
                     return true;
                 }, 'upstream');
@@ -107,33 +117,8 @@ class NodeManager {
         }
     }
 
-    traverse(src: string, fn: (node: Node<NodeObject>) => boolean, direction: connectionType) {
-        if (direction == 'both') {
-            console.error("cannot use both as that would create infinite loop, use forEach instead");
-            return;
-        }
-
-        const queue = [ src ];
-
-        while (queue.length != 0) {
-            const id = queue.shift() ?? "";
-            const node = this.getNode<NodeObject>(id);
-
-            if (!node) {
-                break;
-            }
-
-            const propagate = fn(node);
-
-            if (propagate) {
-                node.getConnections(direction).forEach((connections) => {
-                    queue.push(connections.node.id);
-                })
-            }
-        }
-    }
-
     update() {
+        this.validateAll()
         if (this.dispatch) {
             this.dispatch(this.graph.snapshot());
         }

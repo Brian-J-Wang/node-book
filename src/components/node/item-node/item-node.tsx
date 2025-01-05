@@ -9,9 +9,11 @@ import "./item-node.css"
 import "../../../assets/styles.css"
 import validateItemNode from "./item-node-validator";
 import { Node } from "../../../utils/graph";
+import ValidationNotification from "../components/validation-notification";
 
 type ColorCode = "none" | "green" | "yellow" | "red" | "blue" | "purple";
 export class ItemNodeObject extends NodeObject {
+    checkable: boolean;
     checked: boolean;
     title: string;
     description: string;
@@ -20,6 +22,7 @@ export class ItemNodeObject extends NodeObject {
 
     constructor(position: Position) {
         super(position);
+        this.checkable = true;
         this.checked = false;
         this.title = "untitled";
         this.description = "no description";
@@ -69,6 +72,11 @@ class ItemNodeBuilder extends NodeObjectBuilder {
 
     checkList(value: checkListItem[]) {
         this.node.checkList = value;
+        return this;
+    }
+
+    checkable(value: boolean) {
+        this.node.checkable = value;
         return this;
     }
 }
@@ -132,15 +140,26 @@ const ItemNode = ({node} : ItemNodeProps) => {
         return colors.find(color => color.code == code)?.color;
     }
 
+    const handleCheckboxClick = (evt: React.ChangeEvent<HTMLInputElement>) => {
+        evt.stopPropagation();
+        if (node.content.checkable) {
+            node.content.builder().checked(!node.content.checked).complete();
+        }
+    }
+
+    const validationClass = (node.content.validationMessage.isValid)
+    ? ""
+    : "item-node__invalid"
+
     return (
         <NodeWrapper 
             node={node} 
             sidebar={<ItemNodeSideBar node={node.content}/>} 
             contextMenu={contextMenu}>
-            <div className="item-node__container style__border">
+            <div className={`item-node__container style__border ${validationClass}`}>
                 <div className="item-node__header">
                     <div className="item-node__header-left">
-                        <input type="checkbox" className="item-node__check-box" onClick={(evt) => {evt.stopPropagation()}}/>
+                        <input type="checkbox" className="item-node__check-box" onChange={handleCheckboxClick} checked={node.content.checked} disabled={!node.content.checkable}/>
                         <h4 className="item-node__title">
                             {node.content.title}
                         </h4>
@@ -202,6 +221,9 @@ const ItemNodeSideBar: React.FC<{node: ItemNodeObject}> = ({node}) => {
                     }} checkListName={"Poggers"}/>
                 </FormBuilder.Section>
             </FormBuilder>
+            <ValidationNotification validation={
+                node.validationMessage
+            }/>
         </>
     )
 }

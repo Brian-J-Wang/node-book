@@ -96,11 +96,7 @@ const NodeWrapper : React.FC<NodeProps> = ({node, sidebar, contextMenu, children
 
         node.content.builder().position(newPosition).complete();
     }
-
-    useEffect(() => {
-        console.log("mode changed");
-    }, [canvasMode.mode])
-
+    
     return (
         
         <Draggable initialPosition={node.content.position} id={node.id} className="node" onDragEnd={handleDragEnd}>

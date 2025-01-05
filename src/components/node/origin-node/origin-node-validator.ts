@@ -1,18 +1,22 @@
 import { Node, Graph} from "../../../utils/graph";
 import NodeObject from "../node-object";
-import { validationMessage, validNodeMessage } from "../validation/nodeValidation";
 
-function validateOrginNode(tgt: Node<NodeObject>, _graph: Graph<NodeObject>): validationMessage {
+function validateOrginNode(tgt: Node<NodeObject>, _graph: Graph<NodeObject>): boolean {
     const upstreamConnections = tgt.getConnections("upstream");
 
     if (upstreamConnections.length != 0) {
-        return {
+        tgt.content.builder().validationObject({
             isValid: false,
             message: "Origin Node cannot have paths leading to it"
-        }
+        });
+        return false;
     }
 
-    return validNodeMessage;
+    tgt.content.builder().validationObject({
+        isValid: true,
+        message: ""
+    });
+    return true;
 }
 
 export default validateOrginNode;
