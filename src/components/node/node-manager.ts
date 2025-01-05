@@ -54,23 +54,14 @@ class NodeManager {
         this.validate(src2);
     }
 
+    //@ devcl [] refactor: update the validation logic to be more efficient.
+    // validation logic currently iterates through entire graph.
     validate(id: string) {
-        const queue: Node<NodeObject>[] = [ this.graph.getNode(id) ];
-
-        while (queue.length != 0 ) {
-            const node = queue.shift();
-
-            if (!node) {
-                break;
-            }
-
+        this.graph.traverse(id, (node) => {
             const validator = node.content.validator();
-            const isValid = validator(node, this.graph);
-
-            if (!isValid) {
-                queue.push( ...node.getConnections().map((item) => item.node));
-            }
-        }
+            validator(node, this.graph);
+            return true;
+        })
 
         this.update();
     }

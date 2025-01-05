@@ -23,6 +23,7 @@ export default class NodeObject {
         return "node-object";
     }
 
+    //returns true or false depending on whether or not the message has changed
     validator(): (node: Node<NodeObject>, graph: Graph<NodeObject>) => boolean {
         throw new Error("abstract method validator called");
     }

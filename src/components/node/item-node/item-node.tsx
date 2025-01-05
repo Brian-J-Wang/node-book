@@ -9,6 +9,7 @@ import "./item-node.css"
 import "../../../assets/styles.css"
 import validateItemNode from "./item-node-validator";
 import { Node } from "../../../utils/graph";
+import ValidationNotification from "../components/validation-notification";
 
 type ColorCode = "none" | "green" | "yellow" | "red" | "blue" | "purple";
 export class ItemNodeObject extends NodeObject {
@@ -221,6 +222,9 @@ const ItemNodeSideBar: React.FC<{node: ItemNodeObject}> = ({node}) => {
                     }} checkListName={"Poggers"}/>
                 </FormBuilder.Section>
             </FormBuilder>
+            <ValidationNotification validation={
+                node.validationMessage
+            }/>
         </>
     )
 }
